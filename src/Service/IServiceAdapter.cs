@@ -1,7 +1,4 @@
 ﻿using Fidget.Validation.Addresses.Service.Metadata;
-using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Fidget.Validation.Addresses.Service
@@ -9,7 +6,7 @@ namespace Fidget.Validation.Addresses.Service
     /// <summary>
     /// Defines an adapter for interacting with the remote address service.
     /// </summary>
-    
+
     public interface IServiceAdapter
     {
         /// <summary>

@@ -2,8 +2,6 @@
 using Fidget.Validation.Addresses.Service.Metadata.Internal;
 using Moq;
 using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -23,6 +21,14 @@ namespace Fidget.Validation.Addresses.Service
             {
                 MockClient = null;
                 Assert.Throws<ArgumentNullException>( nameof(client), ()=>create() );
+            }
+
+            [Fact]
+            public void Implements_IServiceAdapter()
+            {
+                var actual = create();
+                Assert.IsType<ServiceAdapter>( actual );
+                Assert.IsAssignableFrom<IServiceAdapter>( actual );
             }
         }
 
