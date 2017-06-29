@@ -4,16 +4,16 @@ using System;
 using System.Threading.Tasks;
 using Xunit;
 
-namespace Fidget.Validation.Addresses.Service
+namespace Fidget.Validation.Addresses.Service.Decorators
 {
-    public class NullifyingServiceClientDecoratorTests
+    public class NullifyingDecoratorTests
     {
         Mock<IServiceClient> MockClient = new Mock<IServiceClient>();
         IServiceClient client => MockClient?.Object;
 
-        IServiceClient create() => new NullifyingServiceClientDecorator( client );
+        IServiceClient create() => new NullifyingDecorator( client );
 
-        public class Constructor : NullifyingServiceClientDecoratorTests
+        public class Constructor : NullifyingDecoratorTests
         {
             [Fact]
             public void Requires_client()
@@ -26,12 +26,12 @@ namespace Fidget.Validation.Addresses.Service
             public void Implements_IServiceClient()
             {
                 var actual = create();
-                Assert.IsType<NullifyingServiceClientDecorator>( actual );
+                Assert.IsType<NullifyingDecorator>( actual );
                 Assert.IsAssignableFrom<IServiceClient>( actual );
             }
         }
 
-        public class Query : NullifyingServiceClientDecoratorTests
+        public class Query : NullifyingDecoratorTests
         {
             class Metadata : ICommonMetadata
             {

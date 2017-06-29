@@ -4,13 +4,13 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Fidget.Validation.Addresses.Service
+namespace Fidget.Validation.Addresses.Service.Decorators
 {
     /// <summary>
     /// Decorator that caches service client responses.
     /// </summary>
 
-    class CachedServiceClientDecorator : IServiceClient
+    class CachingDecorator : IServiceClient
     {
         /// <summary>
         /// Service client decorated by the current instance.
@@ -30,7 +30,7 @@ namespace Fidget.Validation.Addresses.Service
         /// <param name="client">Service client to be decorated.</param>
         /// <param name="cache">Cache storage.</param>
         
-        public CachedServiceClientDecorator( IServiceClient client, IMemoryCache cache )
+        public CachingDecorator( IServiceClient client, IMemoryCache cache )
         {
             Client = client ?? throw new ArgumentNullException( nameof(client) );
             Cache = cache ?? throw new ArgumentNullException( nameof(cache) );

@@ -6,9 +6,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
 
-namespace Fidget.Validation.Addresses.Service
+namespace Fidget.Validation.Addresses.Service.Decorators
 {
-    public class CachedServiceClientDecoratorTests
+    public class CachingDecoratorTests
     {
         Mock<IServiceClient> MockClient = new Mock<IServiceClient>();
         Mock<IMemoryCache> MockCache = new Mock<IMemoryCache>();
@@ -16,9 +16,9 @@ namespace Fidget.Validation.Addresses.Service
         IServiceClient client => MockClient?.Object;
         IMemoryCache cache => MockCache?.Object;
 
-        IServiceClient create() => new CachedServiceClientDecorator( client, cache );
+        IServiceClient create() => new CachingDecorator( client, cache );
 
-        public class Constructor : CachedServiceClientDecoratorTests
+        public class Constructor : CachingDecoratorTests
         {
             [Fact]
             public void Requires_client()
@@ -38,12 +38,12 @@ namespace Fidget.Validation.Addresses.Service
             public void Implements_IServiceClient()
             {
                 var actual = create();
-                Assert.IsType<CachedServiceClientDecorator>( actual );
+                Assert.IsType<CachingDecorator>( actual );
                 Assert.IsAssignableFrom<IServiceClient>( actual );
             }
         }
 
-        public class Query : CachedServiceClientDecoratorTests
+        public class Query : CachingDecoratorTests
         {
             class Metadata : ICommonMetadata
             {

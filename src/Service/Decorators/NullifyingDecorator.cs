@@ -2,13 +2,13 @@
 using System;
 using System.Threading.Tasks;
 
-namespace Fidget.Validation.Addresses.Service
+namespace Fidget.Validation.Addresses.Service.Decorators
 {
     /// <summary>
     /// Decorator that converts responses to default values of the type when the response is not a valid entry.
     /// </summary>
 
-    class NullifyingServiceClientDecorator : IServiceClient
+    class NullifyingDecorator : IServiceClient
     {
         /// <summary>
         /// Service client decorated by the current instance.
@@ -21,7 +21,7 @@ namespace Fidget.Validation.Addresses.Service
         /// </summary>
         /// <param name="client">Service client decorated by the current instance.</param>
         
-        public NullifyingServiceClientDecorator( IServiceClient client )
+        public NullifyingDecorator( IServiceClient client )
         {
             Client = client ?? throw new ArgumentNullException( nameof(client) );
         }
