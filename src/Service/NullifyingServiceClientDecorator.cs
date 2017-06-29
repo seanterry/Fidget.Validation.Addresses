@@ -27,7 +27,7 @@ namespace Fidget.Validation.Addresses.Service
         }
 
         /// <summary>
-        /// Returns a cached query response for the specified record if one exists, otherwise querying the remote service.
+        /// Returns a query response for the specified record if it has an identifier, otherwise null.
         /// </summary>
         /// <typeparam name="T">Type of the metadata response.</typeparam>
         /// <param name="id">Data record to return.</param>
