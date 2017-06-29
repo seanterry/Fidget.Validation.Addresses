@@ -6,17 +6,17 @@ using System.Linq;
 namespace Fidget.Validation.Addresses.Service
 {
     /// <summary>
-    /// Converter for handling collections of tilde (~) delimited data from the address service.
+    /// Converter for handling collections of tilde (~) delimited boolean data from the address service.
     /// </summary>
 
-    class TildeDelimitedStringConverter : JsonConverter
+    class TildeDelimitedBooleanConverter : JsonConverter
     {
         /// <summary>
         /// Returns whether the converter can handle properties of the given type.
         /// </summary>
         /// <param name="objectType">Target property type.</param>
         
-        public override bool CanConvert( Type objectType ) => objectType == typeof(IEnumerable<string>);
+        public override bool CanConvert( Type objectType ) => objectType == typeof(IEnumerable<bool>);
         
         /// <summary>
         /// Deserializes the property value.
@@ -32,7 +32,9 @@ namespace Fidget.Validation.Addresses.Service
             
             // converts candidate strings
             // empty strings should be represented as null
-            string convert( string candidate ) => string.IsNullOrEmpty( candidate ) ? null : candidate;
+            bool convert( string candidate ) => bool.TryParse( candidate, out bool value )
+                ? value
+                : throw new JsonSerializationException( $"Value [{candidate}] cannot be converted to a boolean" );
 
             return string.IsNullOrEmpty( source ) 
                 ? null 
@@ -48,10 +50,11 @@ namespace Fidget.Validation.Addresses.Service
         
         public override void WriteJson( JsonWriter writer, object value, JsonSerializer serializer )
         {
-            if ( value is IEnumerable<string> collection )
+            if ( value is IEnumerable<bool> collection )
             {
                 // only serialize if there are any elements; empty collection should be represented as null
-                if ( collection.Any() ) serializer.Serialize( writer, string.Join( "~", collection ) );
+                // correct case on string representation
+                if ( collection.Any() ) serializer.Serialize( writer, string.Join( "~", collection.Select( _ => _ ? "true" : "false" ) ) );
             }
 
             else if ( value != null ) 
