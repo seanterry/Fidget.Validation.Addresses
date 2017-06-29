@@ -9,7 +9,7 @@ namespace Fidget.Validation.Addresses.Service
     /// Client for accessing the remote address data service.
     /// </summary>
 
-    class ServiceClient
+    class ServiceClient : IServiceClient
     {
         /// <summary>
         /// Service root URI.
@@ -29,7 +29,7 @@ namespace Fidget.Validation.Addresses.Service
         /// <typeparam name="T">Type of the metadata response.</typeparam>
         /// <param name="id">Data record to return.</param>
         
-        public async Task<T> Query<T>( string id ) //where T: IAddressMetadata
+        public async Task<T> Query<T>( string id ) where T: ICommonMetadata
         {
             var uri = $"{Root}/{id}";
             var json = await Client.GetStringAsync( uri );
