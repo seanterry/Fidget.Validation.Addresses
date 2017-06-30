@@ -3,20 +3,20 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Fidget.Validation.Addresses.Service
+namespace Fidget.Validation.Addresses.Service.Converters
 {
     /// <summary>
-    /// Converter for handling collections of tilde (~) delimited boolean data from the address service.
+    /// Converter for handling collections of tilde (~) delimited data from the address service.
     /// </summary>
 
-    class TildeDelimitedBooleanConverter : JsonConverter
+    class TildeDelimitedStringConverter : JsonConverter
     {
         /// <summary>
         /// Returns whether the converter can handle properties of the given type.
         /// </summary>
         /// <param name="objectType">Target property type.</param>
         
-        public override bool CanConvert( Type objectType ) => objectType == typeof(IEnumerable<bool>);
+        public override bool CanConvert( Type objectType ) => objectType == typeof(IEnumerable<string>);
         
         /// <summary>
         /// Deserializes the property value.
@@ -32,9 +32,7 @@ namespace Fidget.Validation.Addresses.Service
             
             // converts candidate strings
             // empty strings should be represented as null
-            bool convert( string candidate ) => bool.TryParse( candidate, out bool value )
-                ? value
-                : throw new JsonSerializationException( $"Value [{candidate}] cannot be converted to a boolean" );
+            string convert( string candidate ) => string.IsNullOrEmpty( candidate ) ? null : candidate;
 
             return string.IsNullOrEmpty( source ) 
                 ? null 
@@ -50,11 +48,10 @@ namespace Fidget.Validation.Addresses.Service
         
         public override void WriteJson( JsonWriter writer, object value, JsonSerializer serializer )
         {
-            if ( value is IEnumerable<bool> collection )
+            if ( value is IEnumerable<string> collection )
             {
                 // only serialize if there are any elements; empty collection should be represented as null
-                // correct case on string representation
-                if ( collection.Any() ) serializer.Serialize( writer, string.Join( "~", collection.Select( _ => _ ? "true" : "false" ) ) );
+                if ( collection.Any() ) serializer.Serialize( writer, string.Join( "~", collection ) );
             }
 
             else if ( value != null ) 

@@ -1,22 +1,20 @@
 ﻿using Newtonsoft.Json;
-using System;
 using System.Collections.Generic;
-using System.Text;
 using Xunit;
 
-namespace Fidget.Validation.Addresses.Service
+namespace Fidget.Validation.Addresses.Service.Converters
 {
-    public class TildeDelimitedBooleanConverterTests
+    public class TildeDelimitedStringConverterTests
     {
         class Model
         {
-            [JsonConverter(typeof(TildeDelimitedBooleanConverter))]
-            public IEnumerable<bool> Value { get; set; }
+            [JsonConverter(typeof(TildeDelimitedStringConverter))]
+            public IEnumerable<string> Value { get; set; }
         }
-
+        
         public class ReadJson
         {
-            IEnumerable<bool> invoke( string source )
+            IEnumerable<string> invoke( string source )
             {
                 var json = JsonConvert.SerializeObject( new { Value = source } );
                 var model = JsonConvert.DeserializeObject<Model>( json );
@@ -35,36 +33,33 @@ namespace Fidget.Validation.Addresses.Service
 
             public static IEnumerable<object[]> GetConvertibleValues()
             {
-                yield return new object[] { "true", new bool[] { true } };
-                yield return new object[] { "false", new bool[] { false } };
-                yield return new object[] { "true~false~true", new bool[] { true, false, true } };
-                yield return new object[] { "false~true~false", new bool[] { false, true, false } };
+                yield return new object[] { "AA", new string[] { "AA" } };
+                yield return new object[] { "AA~BB~CC", new string[] { "AA", "BB", "CC" } };
+                
+                // individual empty elements should be represented as null in the collection
+                yield return new object[] { "AA~~CC", new string[] { "AA", null, "CC" } };
+                yield return new object[] { "~", new string[] { null, null } };
+                yield return new object[] { "~~", new string[] { null, null, null } };
             }
 
             [Theory]
             [MemberData(nameof(GetConvertibleValues))]
-            public void Returns_deserializedCollection_whenSourceIsNotNullOrEmpty( string source, IEnumerable<bool> expected )
+            public void Returns_deserializedCollection_whenSourceIsNotNullOrEmpty( string source, IEnumerable<string> expected )
             {
                 var actual = invoke( source );
                 Assert.Equal( expected, actual );
             }
 
-            [Fact]
-            public void Throws_whenNonParseableAsBoolean()
-            {
-                Assert.Throws<JsonSerializationException>( ()=> invoke( "true~red~false" ) );
-            }
-
             class InvalidDecoration
             {
-                [JsonConverter(typeof(TildeDelimitedBooleanConverter))]
+                [JsonConverter(typeof(TildeDelimitedStringConverter))]
                 public int Value { get; set; }
             }
 
             [Fact]
             public void Throws_WhenWrongTypeDecorated()
             {
-                var source = JsonConvert.SerializeObject( new { Value = "true~false" } );
+                var source = JsonConvert.SerializeObject( new { Value = "AA" } );
                 void invokeWrongDataType() => JsonConvert.DeserializeObject<InvalidDecoration>( source );
                 Assert.Throws<JsonSerializationException>( () => invokeWrongDataType() );
             }
@@ -78,7 +73,7 @@ namespace Fidget.Validation.Addresses.Service
                 public string Value { get; set; }
             }
 
-            string invoke( IEnumerable<bool> source )
+            string invoke( IEnumerable<string> source )
             {
                 var model = new Model { Value = source };
                 var json = JsonConvert.SerializeObject( model );
@@ -89,13 +84,13 @@ namespace Fidget.Validation.Addresses.Service
 
             public static IEnumerable<object[]> GetNullOrEmptyCollections()
             {
-                yield return new object[] { default(bool[]) };
-                yield return new object[] { new bool[0] };
+                yield return new object[] { default(string[]) };
+                yield return new object[] { new string[0] };
             }
 
             [Theory]
             [MemberData(nameof(GetNullOrEmptyCollections))]
-            public void Returns_null_whenSourceIsNullOrEmptyCollection( IEnumerable<bool> source )
+            public void Returns_null_whenSourceIsNullOrEmptyCollection( IEnumerable<string> source )
             {
                 var actual = invoke( source );
                 Assert.Null( actual );
@@ -103,15 +98,22 @@ namespace Fidget.Validation.Addresses.Service
 
             public static IEnumerable<object[]> GetConvertibleValues()
             {
-                yield return new object[] { "true", new bool[] { true } };
-                yield return new object[] { "false", new bool[] { false } };
-                yield return new object[] { "true~false~true", new bool[] { true, false, true } };
-                yield return new object[] { "false~true~false", new bool[] { false, true, false } };
+                yield return new object[] { "AA", new string[] { "AA" } };
+                yield return new object[] { "AA~BB~CC", new string[] { "AA", "BB", "CC" } };
+
+                // individual null elements should be represented as empty in the collection
+                yield return new object[] { "AA~~CC", new string[] { "AA", null, "CC" } };
+                yield return new object[] { "~", new string[] { null, null } };
+                yield return new object[] { "~~", new string[] { null, null, null } };
+
+                yield return new object[] { "AA~~CC", new string[] { "AA", "", "CC" } };
+                yield return new object[] { "~", new string[] { "", "" } };
+                yield return new object[] { "~~", new string[] { "", "", "" } };
             }
 
             [Theory]
             [MemberData( nameof( GetConvertibleValues ) )]
-            public void Returns_deserializedCollection_whenSourceIsNotNullOrEmpty( string expected, IEnumerable<bool> source )
+            public void Returns_deserializedCollection_whenSourceIsNotNullOrEmpty( string expected, IEnumerable<string> source )
             {
                 var actual = invoke( source );
                 Assert.Equal( expected, actual );
@@ -119,7 +121,7 @@ namespace Fidget.Validation.Addresses.Service
 
             class InvalidDecoration
             {
-                [JsonConverter(typeof(TildeDelimitedBooleanConverter))]
+                [JsonConverter(typeof(TildeDelimitedStringConverter))]
                 public int Value { get; set; }
             }
 
