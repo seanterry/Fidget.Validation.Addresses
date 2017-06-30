@@ -3,7 +3,7 @@ using Fidget.Validation.Addresses.Service.Metadata;
 using System;
 using System.Threading.Tasks;
 
-namespace Fidget.Validation.Addresses.Service
+namespace Fidget.Validation.Addresses.Service.Decorators
 {
     /// <summary>
     /// Decorator for providing copies of metadata.

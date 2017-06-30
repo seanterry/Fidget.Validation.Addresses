@@ -9,7 +9,7 @@ namespace Fidget.Validation.Addresses.Service
     /// Client for accessing the remote address data service.
     /// </summary>
 
-    class ServiceClient : IServiceClient
+    partial class ServiceClient : IServiceClient
     {
         /// <summary>
         /// Service root URI.
