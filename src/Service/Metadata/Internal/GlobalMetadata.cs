@@ -4,6 +4,10 @@ using System.Collections.Generic;
 
 namespace Fidget.Validation.Addresses.Service.Metadata.Internal
 {
+    /// <summary>
+    /// Global-level metadata.
+    /// </summary>
+    
     class GlobalMetadata : CommonMetadata, IGlobalMetadata
     {
         /// <summary>
