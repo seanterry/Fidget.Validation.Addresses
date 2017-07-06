@@ -47,6 +47,14 @@ namespace Fidget.Validation.Addresses
         public async Task<IGlobalMetadata> GetGlobalAsync() => await Client.Query<GlobalMetadata>( "data" );
 
         /// <summary>
+        /// Builds and returns the data service identifier based on the given keys and language.
+        /// </summary>
+        /// <param name="language">Language to encode into the identifier.</param>
+        /// <param name="keys">Keys for the identifier.</param>
+                
+        string BuildIdentifier( string language, params string[] keys ) => $"data/{string.Join( "/", keys )}{(language != null ? $"--{language}" : string.Empty)}";
+
+        /// <summary>
         /// Returns metadata for the specified country if it is available.
         /// </summary>
         /// <param name="countryKey">Key of the country to return.</param>
@@ -56,8 +64,7 @@ namespace Fidget.Validation.Addresses
         {
             if ( countryKey == null ) throw new ArgumentNullException( nameof( countryKey ) );
 
-            var id = $"data/{countryKey}{(language != null ? $"--{language}" : string.Empty)}";
-
+            var id = BuildIdentifier( language, countryKey );
             var defaults = await Client.Query<CountryMetadata>( "data/ZZ" );
             var result = await Client.Query<CountryMetadata>( id );
 
@@ -87,7 +94,7 @@ namespace Fidget.Validation.Addresses
             if ( countryKey == null ) throw new ArgumentNullException( nameof( countryKey ) );
             if ( provinceKey == null ) throw new ArgumentNullException( nameof( provinceKey ) );
 
-            var id = $"data/{countryKey}/{provinceKey}{( language != null ? $"--{language}" : string.Empty )}";
+            var id = BuildIdentifier( language, countryKey, provinceKey );
             
             return await Client.Query<ProvinceMetadata>( id );
         }
@@ -106,9 +113,30 @@ namespace Fidget.Validation.Addresses
             if ( provinceKey == null ) throw new ArgumentNullException( nameof( provinceKey ) );
             if ( localityKey == null ) throw new ArgumentNullException( nameof( localityKey ) );
 
-            var id = $"data/{countryKey}/{provinceKey}/{localityKey}{(language != null ? $"--{language}" : string.Empty)}";
+            var id = BuildIdentifier( language, countryKey, provinceKey, localityKey );
 
             return await Client.Query<LocalityMetadata>( id );
+        }
+
+        /// <summary>
+        /// Returns metadata for the specified sublocality if it is available.
+        /// </summary>
+        /// <param name="countryKey">Key of the parent country.</param>
+        /// <param name="provinceKey">Key of the parent province.</param>
+        /// <param name="localityKey">Key of the parent locality.</param>
+        /// <param name="sublocalityKey">Key of the sublocality to return.</param>
+        /// <param name="language">Language code for the metadata to return.</param>
+        
+        public async Task<ISublocalityMetadata> GetSublocalityAsync( string countryKey, string provinceKey, string localityKey, string sublocalityKey, string language )
+        {
+            if ( countryKey == null ) throw new ArgumentNullException( nameof( countryKey ) );
+            if ( provinceKey == null ) throw new ArgumentNullException( nameof( provinceKey ) );
+            if ( localityKey == null ) throw new ArgumentNullException( nameof( localityKey ) );
+            if ( sublocalityKey == null ) throw new ArgumentNullException( nameof( sublocalityKey ) );
+
+            var id = BuildIdentifier( language, countryKey, provinceKey, localityKey, sublocalityKey );
+
+            return await Client.Query<SublocalityMetadata>( id );
         }
     }
 }

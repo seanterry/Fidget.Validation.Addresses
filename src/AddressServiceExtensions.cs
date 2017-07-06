@@ -1,14 +1,12 @@
 ﻿using Fidget.Validation.Addresses.Service.Metadata;
 using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Fidget.Validation.Addresses
 {
     /// <summary>
     /// Extension methods related to the address service.
     /// </summary>
-    
+
     public static class AddressServiceExtensions
     {
         /// <summary>
@@ -88,6 +86,32 @@ namespace Fidget.Validation.Addresses
 
             return service
                 .GetLocalityAsync( countryKey, provinceKey, localityKey, language )
+                .Result;
+        }
+
+        /// <summary>
+        /// Returns metadata for the specified sublocality if it is available.
+        /// </summary>
+        /// <param name="service">Address service.</param>
+        /// <param name="countryKey">Key of the parent country.</param>
+        /// <param name="provinceKey">Key of the parent province.</param>
+        /// <param name="localityKey">Key of the parent locality.</param>
+        /// <param name="sublocalityKey">Key of the sublocality to return.</param>
+        /// <param name="language">
+        /// (Optional) Language code for the metadata to return.
+        /// If metadata is not available for the language, no result will be returned.
+        /// </param>
+
+        public static ISublocalityMetadata GetSublocality( this IAddressService service, string countryKey, string provinceKey, string localityKey, string sublocalityKey, string language = null )
+        {
+            if ( service == null ) throw new ArgumentNullException( nameof( service ) );
+            if ( countryKey == null ) throw new ArgumentNullException( nameof( countryKey ) );
+            if ( provinceKey == null ) throw new ArgumentNullException( nameof( provinceKey ) );
+            if ( localityKey == null ) throw new ArgumentNullException( nameof( localityKey ) );
+            if ( sublocalityKey == null ) throw new ArgumentNullException( nameof( sublocalityKey ) );
+
+            return service
+                .GetSublocalityAsync( countryKey, provinceKey, localityKey, sublocalityKey, language )
                 .Result;
         }
     }
