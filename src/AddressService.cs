@@ -47,7 +47,7 @@ namespace Fidget.Validation.Addresses
         public async Task<IGlobalMetadata> GetGlobalAsync() => await Client.Query<GlobalMetadata>( "data" );
 
         /// <summary>
-        /// Returns metadata for the specified country.
+        /// Returns metadata for the specified country if it is available.
         /// </summary>
         /// <param name="countryKey">Key of the country to return.</param>
         /// <param name="language">Language code for the metadata to return.</param>
@@ -56,9 +56,7 @@ namespace Fidget.Validation.Addresses
         {
             if ( countryKey == null ) throw new ArgumentNullException( nameof( countryKey ) );
 
-            var id = language != null
-                ? $"data/{countryKey}--{language}"
-                : $"data/{countryKey}";
+            var id = $"data/{countryKey}{(language != null ? $"--{language}" : string.Empty)}";
 
             var defaults = await Client.Query<CountryMetadata>( "data/ZZ" );
             var result = await Client.Query<CountryMetadata>( id );
@@ -75,6 +73,23 @@ namespace Fidget.Validation.Addresses
             }
             
             return result;
+        }
+
+        /// <summary>
+        /// Returns metadata for the specified province if it is available.
+        /// </summary>
+        /// <param name="countryKey">Key of the parent country.</param>
+        /// <param name="provinceKey">Key of the province to return.</param>
+        /// <param name="language">Language code for the metadata to return.</param>
+        
+        public async Task<IProvinceMetadata> GetProvinceAsync( string countryKey, string provinceKey, string language )
+        {
+            if ( countryKey == null ) throw new ArgumentNullException( nameof( countryKey ) );
+            if ( provinceKey == null ) throw new ArgumentNullException( nameof( provinceKey ) );
+
+            var id = $"data/{countryKey}/{provinceKey}{( language != null ? $"--{language}" : string.Empty )}";
+            
+            return await Client.Query<ProvinceMetadata>( id );
         }
     }
 }

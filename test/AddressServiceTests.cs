@@ -165,5 +165,49 @@ namespace Fidget.Validation.Addresses
                 MockClient.VerifyAll();
             }
         }
+
+        public class GetProvinceAsync : AddressServiceTests
+        {
+            string countryKey = Guid.NewGuid().ToString();
+            string provinceKey = Guid.NewGuid().ToString();
+            string language = Guid.NewGuid().ToString();
+            async Task<IProvinceMetadata> invoke() => await create().GetProvinceAsync( countryKey, provinceKey, language );
+
+            [Fact]
+            public async Task Requires_countryKey()
+            {
+                countryKey = null;
+                await Assert.ThrowsAsync<ArgumentNullException>( nameof(countryKey), invoke );
+            }
+
+            [Fact]
+            public async Task Requires_provinceKey()
+            {
+                provinceKey = null;
+                await Assert.ThrowsAsync<ArgumentNullException>( nameof( provinceKey ), invoke );
+            }
+
+            public static IEnumerable<object[]> GetArguments()
+            {
+                yield return new object[] { "XX", "ZZ", null, "data/XX/ZZ", null };
+                yield return new object[] { "XX", "ZZ", null, "data/XX/ZZ", new ProvinceMetadata { Id = "data/XX/ZZ" } };
+                yield return new object[] { "XX", "ZZ", "xyz", "data/XX/ZZ--xyz", null };
+                yield return new object[] { "XX", "ZZ", "xyz", "data/XX/ZZ--xyz", new ProvinceMetadata { Id = "data/XX/ZZ--xyz" } };
+            }
+
+            [Theory]
+            [MemberData(nameof(GetArguments))]
+            public async Task Returns_clientResult( string countryKey, string provinceKey, string language, string id, IProvinceMetadata expected )
+            {
+                this.countryKey = countryKey;
+                this.provinceKey = provinceKey;
+                this.language = language;
+                MockClient.Setup( _=> _.Query<ProvinceMetadata>( id ) ).ReturnsAsync( (ProvinceMetadata) expected ).Verifiable();
+
+                var actual = await invoke();
+                Assert.Equal( expected, actual );
+                MockClient.VerifyAll();
+            }
+        }
     }
 }

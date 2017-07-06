@@ -43,5 +43,26 @@ namespace Fidget.Validation.Addresses
                 .GetCountryAsync( countryKey, language )
                 .Result;
         }
+
+        /// <summary>
+        /// Returns metadata for the specified province if it is available.
+        /// </summary>
+        /// <param name="countryKey">Key of the parent country.</param>
+        /// <param name="provinceKey">Key of the province to return.</param>
+        /// <param name="language">
+        /// (Optional) Language code for the metadata to return.
+        /// If metadata is not available for the language, no result will be returned.
+        /// </param>
+        
+        public static IProvinceMetadata GetProvince( this IAddressService service, string countryKey, string provinceKey, string language = null )
+        {
+            if ( service == null ) throw new ArgumentNullException( nameof( service ) );
+            if ( countryKey == null ) throw new ArgumentNullException( nameof( countryKey ) );
+            if ( provinceKey == null ) throw new ArgumentNullException( nameof( provinceKey ) );
+
+            return service
+                .GetProvinceAsync( countryKey, provinceKey, language )
+                .Result;
+        }
     }
 }
