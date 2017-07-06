@@ -54,6 +54,14 @@ namespace Fidget.Validation.Addresses.Service.Metadata.Internal
         public string LatinFormat { get; set; }
 
         /// <summary>
+        /// Gets the address elements that should be uppercased for valid addresses in the country.
+        /// </summary>
+        
+        [JsonProperty("upper")]
+        [JsonConverter(typeof(CharacterCollectionConverter))]
+        public IEnumerable<char> Uppercase { get; set; }
+
+        /// <summary>
         /// Gets the name used to describe the state/province level region in the country.
         /// </summary>
         /// <remarks>

@@ -47,9 +47,34 @@ namespace Fidget.Validation.Addresses
         public async Task<IGlobalMetadata> GetGlobalAsync() => await Client.Query<GlobalMetadata>( "data" );
 
         /// <summary>
-        /// Returns gobal metadata information.
+        /// Returns metadata for the specified country.
         /// </summary>
-        
-        public IGlobalMetadata GetGlobal() => GetGlobalAsync().Result;
+        /// <param name="countryKey">Key of the country to return.</param>
+        /// <param name="language">Language code for the metadata to return.</param>
+
+        public async Task<ICountryMetadata> GetCountryAsync( string countryKey, string language )
+        {
+            if ( countryKey == null ) throw new ArgumentNullException( nameof( countryKey ) );
+
+            var id = language != null
+                ? $"data/{countryKey}--{language}"
+                : $"data/{countryKey}";
+
+            var defaults = await Client.Query<CountryMetadata>( "data/ZZ" );
+            var result = await Client.Query<CountryMetadata>( id );
+
+            if ( result != null && defaults != null )
+            {
+                result.Format = result.Format ?? defaults.Format;
+                result.Required = result.Required ?? defaults.Required;
+                result.Uppercase = result.Uppercase ?? defaults.Uppercase;
+                result.StateType = result.StateType ?? defaults.StateType;
+                result.LocalityType = result.LocalityType ?? defaults.LocalityType;
+                result.SublocalityType = result.SublocalityType ?? defaults.SublocalityType;
+                result.PostalCodeType = result.PostalCodeType ?? defaults.PostalCodeType;
+            }
+            
+            return result;
+        }
     }
 }
