@@ -209,5 +209,58 @@ namespace Fidget.Validation.Addresses
                 MockClient.VerifyAll();
             }
         }
+
+        public class GetLocalityAsync : AddressServiceTests
+        {
+            string countryKey = Guid.NewGuid().ToString();
+            string provinceKey = Guid.NewGuid().ToString();
+            string localityKey = Guid.NewGuid().ToString();
+            string language = Guid.NewGuid().ToString();
+            async Task<ILocalityMetadata> invoke() => await create().GetLocalityAsync( countryKey, provinceKey, localityKey, language );
+
+            [Fact]
+            public async Task Requires_countryKey()
+            {
+                countryKey = null;
+                await Assert.ThrowsAsync<ArgumentNullException>( nameof( countryKey ), invoke );
+            }
+
+            [Fact]
+            public async Task Requires_provinceKey()
+            {
+                provinceKey = null;
+                await Assert.ThrowsAsync<ArgumentNullException>( nameof( provinceKey ), invoke );
+            }
+
+            [Fact]
+            public async Task Requires_localityKey()
+            {
+                localityKey = null;
+                await Assert.ThrowsAsync<ArgumentNullException>( nameof( localityKey ), invoke );
+            }
+
+            public static IEnumerable<object[]> GetArguments()
+            {
+                yield return new object[] { "XX", "ZZ", "ZY", null, "data/XX/ZZ/ZY", null };
+                yield return new object[] { "XX", "ZZ", "ZY", null, "data/XX/ZZ/ZY", new LocalityMetadata { Id = "data/XX/ZZ/ZY" } };
+                yield return new object[] { "XX", "ZZ", "ZY", "xyz", "data/XX/ZZ/ZY--xyz", null };
+                yield return new object[] { "XX", "ZZ", "ZY", "xyz", "data/XX/ZZ/ZY--xyz", new LocalityMetadata { Id = "data/XX/ZZ/ZY--xyz" } };
+            }
+
+            [Theory]
+            [MemberData( nameof(GetArguments) )]
+            public async Task Returns_clientResult( string countryKey, string provinceKey, string localityKey, string language, string id, ILocalityMetadata expected )
+            {
+                this.countryKey = countryKey;
+                this.provinceKey = provinceKey;
+                this.localityKey = localityKey;
+                this.language = language;
+                MockClient.Setup( _ => _.Query<LocalityMetadata>( id ) ).ReturnsAsync( (LocalityMetadata)expected ).Verifiable();
+
+                var actual = await invoke();
+                Assert.Equal( expected, actual );
+                MockClient.VerifyAll();
+            }
+        }
     }
 }

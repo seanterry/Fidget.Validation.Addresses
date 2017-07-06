@@ -91,5 +91,24 @@ namespace Fidget.Validation.Addresses
             
             return await Client.Query<ProvinceMetadata>( id );
         }
+
+        /// <summary>
+        /// Returns metadata for the specified locality if it is available.
+        /// </summary>
+        /// <param name="countryKey">Key of the parent country.</param>
+        /// <param name="provinceKey">Key of the parent province.</param>
+        /// <param name="localityKey">Key of the locality to return.</param>
+        /// <param name="language">Language code for the metadata to return.</param>
+        
+        public async Task<ILocalityMetadata> GetLocalityAsync( string countryKey, string provinceKey, string localityKey, string language )
+        {
+            if ( countryKey == null ) throw new ArgumentNullException( nameof( countryKey ) );
+            if ( provinceKey == null ) throw new ArgumentNullException( nameof( provinceKey ) );
+            if ( localityKey == null ) throw new ArgumentNullException( nameof( localityKey ) );
+
+            var id = $"data/{countryKey}/{provinceKey}/{localityKey}{(language != null ? $"--{language}" : string.Empty)}";
+
+            return await Client.Query<LocalityMetadata>( id );
+        }
     }
 }

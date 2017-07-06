@@ -37,5 +37,18 @@ namespace Fidget.Validation.Addresses
         /// </param>
 
         Task<IProvinceMetadata> GetProvinceAsync( string countryKey, string provinceKey, string language = null );
+
+        /// <summary>
+        /// Returns metadata for the specified locality if it is available.
+        /// </summary>
+        /// <param name="countryKey">Key of the parent country.</param>
+        /// <param name="provinceKey">Key of the parent province.</param>
+        /// <param name="localityKey">Key of the locality to return.</param>
+        /// <param name="language">
+        /// (Optional) Language code for the metadata to return.
+        /// If metadata is not available for the language, no result will be returned.
+        /// </param>
+
+        Task<ILocalityMetadata> GetLocalityAsync( string countryKey, string provinceKey, string localityKey, string language = null );
     }
 }
