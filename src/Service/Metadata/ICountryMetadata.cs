@@ -1,14 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
 
 namespace Fidget.Validation.Addresses.Service.Metadata
 {
     /// <summary>
     /// Defines the elements of country-level address metadata. 
     /// </summary>
-    
-    public interface ICountryMetadata : IRegionalMetadata
+
+    public interface ICountryMetadata : IHierarchicalMetadata
     {
         /// <summary>
         /// Gets the collection of languages for which regional data is available (if known).

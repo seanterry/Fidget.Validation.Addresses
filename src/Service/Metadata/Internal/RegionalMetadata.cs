@@ -38,58 +38,6 @@ namespace Fidget.Validation.Addresses.Service.Metadata.Internal
         public string LatinName { get; set; }
 
         /// <summary>
-        /// Gets the <see cref="Key"/> values of this region's sub-regions (if any).
-        /// </summary>
-        /// <remarks>
-        /// <see cref="https://github.com/googlei18n/libaddressinput/blob/master/common/src/main/java/com/google/i18n/addressinput/common/AddressDataKey.java"/>
-        /// The <see cref="Key"/> values of all the children of this region.
-        /// </remarks>
-
-        [JsonProperty("sub_keys")]
-        [JsonConverter(typeof(TildeDelimitedStringConverter))]
-        public IEnumerable<string> ChildRegionKeys { get; set; }
-
-        /// <summary>
-        /// Gets the <see cref="Name"/> values of this region's sub-regions (if any).
-        /// </summary>
-        /// <remarks>
-        /// <see cref="https://github.com/googlei18n/libaddressinput/blob/master/common/src/main/java/com/google/i18n/addressinput/common/AddressDataKey.java"/>
-        /// Encodes the local name value of all the children of this region.
-        /// <see cref="https://github.com/googlei18n/libaddressinput/blob/master/common/src/main/java/com/google/i18n/addressinput/common/FieldVerifier.java"/>
-        /// If there are latin names but no local names, and there are the same number of latin names as there are keys, 
-        /// then we assume the local names are the same as the keys.
-        /// </remarks>
-
-        [JsonProperty("sub_names")]
-        [JsonConverter(typeof(TildeDelimitedStringConverter))]
-        public IEnumerable<string> ChildRegionNames { get; set; }
-
-        /// <summary>
-        /// Gets the <see cref="LatinName"/> values of this region's sub-regions (if any).
-        /// </summary>
-        /// <remarks>
-        /// <see cref="https://github.com/googlei18n/libaddressinput/blob/master/common/src/main/java/com/google/i18n/addressinput/common/AddressDataKey.java"/>
-        /// Encodes the transliterated latin name value of all the children of this region, 
-        /// if the local names are not in latin script already.
-        /// </remarks>
-        
-        [JsonProperty("sub_lnames")]
-        [JsonConverter(typeof(TildeDelimitedStringConverter))]
-        public IEnumerable<string> ChildRegionLatinNames { get; set; }
-        
-        /// <summary>
-        /// Gets whether child regions have their own children.
-        /// </summary>
-        /// <remarks>
-        /// <see cref="https://github.com/googlei18n/libaddressinput/blob/master/common/src/main/java/com/google/i18n/addressinput/common/AddressDataKey.java"/>
-        /// Indicates, for each child of this region, whether that child has additional children.
-        /// </remarks>
-
-        [JsonProperty("sub_mores")]
-        [JsonConverter(typeof(TildeDelimitedBooleanConverter))]
-        public IEnumerable<bool> ChildRegionExpands { get; set; }
-
-        /// <summary>
         /// Gets the language for the regional data (if known).
         /// </summary>
         /// <remarks>
@@ -141,5 +89,57 @@ namespace Fidget.Validation.Addresses.Service.Metadata.Internal
 
         [JsonProperty("xzip")]
         public string PostalCodePatternOverride { get; set; }
+
+        /// <summary>
+        /// Gets the <see cref="Key"/> values of this region's sub-regions (if any).
+        /// </summary>
+        /// <remarks>
+        /// <see cref="https://github.com/googlei18n/libaddressinput/blob/master/common/src/main/java/com/google/i18n/addressinput/common/AddressDataKey.java"/>
+        /// The <see cref="Key"/> values of all the children of this region.
+        /// </remarks>
+
+        [JsonProperty("sub_keys")]
+        [JsonConverter(typeof(TildeDelimitedStringConverter))]
+        public IEnumerable<string> ChildRegionKeys { get; set; }
+
+        /// <summary>
+        /// Gets the <see cref="Name"/> values of this region's sub-regions (if any).
+        /// </summary>
+        /// <remarks>
+        /// <see cref="https://github.com/googlei18n/libaddressinput/blob/master/common/src/main/java/com/google/i18n/addressinput/common/AddressDataKey.java"/>
+        /// Encodes the local name value of all the children of this region.
+        /// <see cref="https://github.com/googlei18n/libaddressinput/blob/master/common/src/main/java/com/google/i18n/addressinput/common/FieldVerifier.java"/>
+        /// If there are latin names but no local names, and there are the same number of latin names as there are keys, 
+        /// then we assume the local names are the same as the keys.
+        /// </remarks>
+
+        [JsonProperty("sub_names")]
+        [JsonConverter(typeof(TildeDelimitedStringConverter))]
+        public IEnumerable<string> ChildRegionNames { get; set; }
+
+        /// <summary>
+        /// Gets the <see cref="LatinName"/> values of this region's sub-regions (if any).
+        /// </summary>
+        /// <remarks>
+        /// <see cref="https://github.com/googlei18n/libaddressinput/blob/master/common/src/main/java/com/google/i18n/addressinput/common/AddressDataKey.java"/>
+        /// Encodes the transliterated latin name value of all the children of this region, 
+        /// if the local names are not in latin script already.
+        /// </remarks>
+        
+        [JsonProperty("sub_lnames")]
+        [JsonConverter(typeof(TildeDelimitedStringConverter))]
+        public IEnumerable<string> ChildRegionLatinNames { get; set; }
+        
+        /// <summary>
+        /// Gets whether child regions have their own children.
+        /// </summary>
+        /// <remarks>
+        /// <see cref="https://github.com/googlei18n/libaddressinput/blob/master/common/src/main/java/com/google/i18n/addressinput/common/AddressDataKey.java"/>
+        /// Indicates, for each child of this region, whether that child has additional children.
+        /// </remarks>
+
+        [JsonProperty("sub_mores")]
+        [JsonConverter(typeof(TildeDelimitedBooleanConverter))]
+        public IEnumerable<bool> ChildRegionExpands { get; set; }
     }
 }
