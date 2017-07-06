@@ -12,6 +12,12 @@ namespace Fidget.Validation.Addresses.Service
     partial class ServiceClient : IServiceClient
     {
         /// <summary>
+        /// Default service client instance.
+        /// </summary>
+        
+        internal static readonly IServiceClient Default = new Factory().Create();
+
+        /// <summary>
         /// Service root URI.
         /// </summary>
         
