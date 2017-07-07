@@ -1,7 +1,6 @@
 # Fidget.Validation.Addresses
-Address validation and metadata exploration via the Google Address Data Service
-
-## Derivative Works
+Address validation and metadata exploration via the Google Address Data Service.
+This is a third-party library that has no affiliation with Google.
 
 ## License
 Copyright 2017 Sean Terry
