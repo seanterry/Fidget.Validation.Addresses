@@ -1,6 +1,7 @@
 ﻿using Fidget.Validation.Addresses.Service;
 using Fidget.Validation.Addresses.Service.Metadata;
 using Fidget.Validation.Addresses.Service.Metadata.Internal;
+using Fidget.Validation.Addresses.Validation;
 using System;
 using System.Threading.Tasks;
 
@@ -19,20 +20,27 @@ namespace Fidget.Validation.Addresses
         readonly IServiceClient Client;
 
         /// <summary>
+        /// Address validation service.
+        /// </summary>
+        
+        readonly IAddressValidator Validator;
+
+        /// <summary>
         /// Constructs a service for address validation and metadata exploration.
         /// </summary>
         /// <param name="client">Remote address service client.</param>
         
-        internal AddressService( IServiceClient client )
+        internal AddressService( IServiceClient client, IAddressValidator validator )
         {
             Client = client ?? throw new ArgumentNullException( nameof(client) );
+            Validator = validator ?? throw new ArgumentNullException( nameof(validator) );
         }
 
         /// <summary>
         /// Constructs a service for address validation and metadata exploration.
         /// </summary>
         
-        public AddressService() : this( ServiceClient.Default ) {}
+        public AddressService() : this( ServiceClient.Default, AddressValidator.Default ) {}
 
         /// <summary>
         /// Returns gobal metadata information.

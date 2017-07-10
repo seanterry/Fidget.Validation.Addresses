@@ -1,5 +1,6 @@
 ﻿using Fidget.Validation.Addresses.Service;
 using Fidget.Validation.Addresses.Service.Decorators;
+using Fidget.Validation.Addresses.Validation;
 using Microsoft.Extensions.Caching.Memory;
 using StructureMap;
 using StructureMap.Graph;
@@ -18,19 +19,15 @@ namespace Fidget.Validation.Addresses
         
         static Container CreateContainer()
         {
-            void scan( IAssemblyScanner scanner )
-            {
-            }
-
             void configure( ConfigurationExpression config )
             {
-                //config.Scan( scan );
-
                 config.For<IMemoryCache>().Use( new MemoryCache( new MemoryCacheOptions() ) ).Singleton();
                 config.For<IServiceClient>().Use<ServiceClient>().Singleton();
                 config.For<IServiceClient>().DecorateAllWith<CachingDecorator>().Singleton();
                 config.For<IServiceClient>().DecorateAllWith<NullifyingDecorator>().Singleton();
                 config.For<IServiceClient>().DecorateAllWith<CopyingDecorator>().Singleton();
+
+                config.For<IAddressValidator>().Use<AddressValidator>().Singleton();
             }
 
             return new Container( configure );

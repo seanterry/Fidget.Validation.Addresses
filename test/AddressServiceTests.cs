@@ -1,6 +1,7 @@
 ﻿using Fidget.Validation.Addresses.Service;
 using Fidget.Validation.Addresses.Service.Metadata;
 using Fidget.Validation.Addresses.Service.Metadata.Internal;
+using Fidget.Validation.Addresses.Validation;
 using Moq;
 using System;
 using System.Collections.Generic;
@@ -14,7 +15,10 @@ namespace Fidget.Validation.Addresses
         Mock<IServiceClient> MockClient = new Mock<IServiceClient>();
         IServiceClient client => MockClient?.Object;
 
-        IAddressService create() => new AddressService( client );
+        Mock<IAddressValidator> MockValidator = new Mock<IAddressValidator>();
+        IAddressValidator validator => MockValidator?.Object;
+
+        IAddressService create() => new AddressService( client, validator );
 
         public class Constructor : AddressServiceTests
         {
@@ -23,6 +27,13 @@ namespace Fidget.Validation.Addresses
             {
                 MockClient = null;
                 Assert.Throws<ArgumentNullException>( nameof(client), ()=>create() );
+            }
+
+            [Fact]
+            public void Requires_validator()
+            {
+                MockValidator = null;
+                Assert.Throws<ArgumentNullException>( nameof(validator), ()=>create() );
             }
 
             [Fact]
