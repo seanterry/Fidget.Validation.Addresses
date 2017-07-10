@@ -3,16 +3,13 @@ using Fidget.Validation.Addresses.Service.Decorators;
 using Microsoft.Extensions.Caching.Memory;
 using StructureMap;
 using StructureMap.Graph;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Fidget.Validation.Addresses
 {
     /// <summary>
     /// Static methods for configuring dependency injection.
     /// </summary>
-    
+
     static class DependencyInjection
     {
         /// <summary>
@@ -27,7 +24,7 @@ namespace Fidget.Validation.Addresses
 
             void configure( ConfigurationExpression config )
             {
-                config.Scan( scan );
+                //config.Scan( scan );
 
                 config.For<IMemoryCache>().Use( new MemoryCache( new MemoryCacheOptions() ) ).Singleton();
                 config.For<IServiceClient>().Use<ServiceClient>().Singleton();
@@ -43,6 +40,6 @@ namespace Fidget.Validation.Addresses
         /// Dependency injection container to use at runtime.
         /// </summary>
         
-        public static readonly Container Container = CreateContainer();
+        public static readonly IContainer Container = CreateContainer();
     }
 }

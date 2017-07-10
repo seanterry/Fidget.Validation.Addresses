@@ -15,7 +15,7 @@ namespace Fidget.Validation.Addresses.Service
         /// Default service client instance.
         /// </summary>
         
-        internal static readonly IServiceClient Default = new Factory().Create();
+        internal static readonly IServiceClient Default = DependencyInjection.Container.GetInstance<IServiceClient>();
 
         /// <summary>
         /// Service root URI.

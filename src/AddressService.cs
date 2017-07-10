@@ -13,12 +13,6 @@ namespace Fidget.Validation.Addresses
     public class AddressService : IAddressService
     {
         /// <summary>
-        /// Default service client factory.
-        /// </summary>
-        
-        static readonly ServiceClient.Factory ServiceClientFactory = new ServiceClient.Factory();
-
-        /// <summary>
         /// Remote address service client.
         /// </summary>
         
