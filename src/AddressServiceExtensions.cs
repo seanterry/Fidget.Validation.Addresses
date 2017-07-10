@@ -1,5 +1,7 @@
 ﻿using Fidget.Validation.Addresses.Service.Metadata;
+using Fidget.Validation.Addresses.Validation;
 using System;
+using System.Collections.Generic;
 
 namespace Fidget.Validation.Addresses
 {
@@ -112,6 +114,23 @@ namespace Fidget.Validation.Addresses
 
             return service
                 .GetSublocalityAsync( countryKey, provinceKey, localityKey, sublocalityKey, language )
+                .Result;
+        }
+
+        /// <summary>
+        /// Validates the given address.
+        /// </summary>
+        /// <param name="service">Address service.</param>
+        /// <param name="address">Address to validate.</param>
+        /// <returns>The collection of validation errors, if any.</returns>
+        
+        public static IEnumerable<ValidationFailure> Validate( this IAddressService service, AddressData address )
+        {
+            if ( service == null ) throw new ArgumentNullException( nameof( service ) );
+            if ( address == null ) throw new ArgumentNullException( nameof( address ) );
+
+            return service
+                .ValidateAsync( address )
                 .Result;
         }
     }

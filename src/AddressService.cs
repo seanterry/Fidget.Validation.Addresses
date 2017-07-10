@@ -3,6 +3,7 @@ using Fidget.Validation.Addresses.Service.Metadata;
 using Fidget.Validation.Addresses.Service.Metadata.Internal;
 using Fidget.Validation.Addresses.Validation;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Fidget.Validation.Addresses
@@ -139,6 +140,17 @@ namespace Fidget.Validation.Addresses
             var id = BuildIdentifier( language, countryKey, provinceKey, localityKey, sublocalityKey );
 
             return await Client.Query<SublocalityMetadata>( id );
+        }
+
+        /// <summary>
+        /// Validates the given address.
+        /// </summary>
+        /// <param name="address">Address to validate.</param>
+        /// <returns>The collection of validation errors, if any.</returns>
+        
+        public async Task<IEnumerable<ValidationFailure>> ValidateAsync( AddressData address )
+        {
+            throw new NotImplementedException();
         }
     }
 }

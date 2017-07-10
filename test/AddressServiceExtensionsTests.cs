@@ -1,7 +1,9 @@
 ﻿using Fidget.Validation.Addresses.Service.Metadata;
 using Fidget.Validation.Addresses.Service.Metadata.Internal;
+using Fidget.Validation.Addresses.Validation;
 using Moq;
 using System;
+using System.Collections.Generic;
 using Xunit;
 
 namespace Fidget.Validation.Addresses
@@ -218,6 +220,39 @@ namespace Fidget.Validation.Addresses
 
                 var actual = invoke();
                 Assert.Equal( expected, actual );
+            }
+        }
+
+        public class Validate : AddressServiceExtensionsTests
+        {
+            AddressData address;
+            IEnumerable<ValidationFailure> invoke() => service.Validate( address );
+
+            [Fact]
+            public void Requires_service()
+            {
+                MockService = null;
+                Assert.Throws<ArgumentNullException>( nameof(service), ()=>invoke() );
+            }
+
+            [Fact]
+            public void Requires_address()
+            {
+                address = null;
+                Assert.Throws<ArgumentNullException>( nameof(address), ()=>invoke() );
+            }
+
+            [Fact]
+            public void Returns_serviceResult()
+            {
+                var expected = new ValidationFailure[2];
+                address = new AddressData();
+
+                MockService.Setup( _=> _.ValidateAsync( address ) ).ReturnsAsync( expected ).Verifiable();
+                var actual = invoke();
+
+                Assert.Same( expected, actual );
+                MockService.VerifyAll();
             }
         }
     }

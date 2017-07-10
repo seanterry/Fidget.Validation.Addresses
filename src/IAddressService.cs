@@ -1,4 +1,6 @@
 ﻿using Fidget.Validation.Addresses.Service.Metadata;
+using Fidget.Validation.Addresses.Validation;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Fidget.Validation.Addresses
@@ -64,5 +66,13 @@ namespace Fidget.Validation.Addresses
         /// </param>
 
         Task<ISublocalityMetadata> GetSublocalityAsync( string countryKey, string provinceKey, string localityKey, string sublocalityKey, string language = null );
+
+        /// <summary>
+        /// Validates the given address.
+        /// </summary>
+        /// <param name="address">Address to validate.</param>
+        /// <returns>The collection of validation errors, if any.</returns>
+
+        Task<IEnumerable<ValidationFailure>> ValidateAsync( AddressData address );
     }
 }
