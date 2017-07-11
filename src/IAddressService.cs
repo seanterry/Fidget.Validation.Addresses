@@ -71,8 +71,9 @@ namespace Fidget.Validation.Addresses
         /// Validates the given address.
         /// </summary>
         /// <param name="address">Address to validate.</param>
+        /// <param name="language">Metadata language.</param>
         /// <returns>The collection of validation errors, if any.</returns>
 
-        Task<IEnumerable<ValidationFailure>> ValidateAsync( AddressData address );
+        Task<IEnumerable<ValidationFailure>> ValidateAsync( AddressData address, string language = null );
     }
 }

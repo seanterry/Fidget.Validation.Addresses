@@ -334,5 +334,53 @@ namespace Fidget.Validation.Addresses
                 MockClient.VerifyAll();
             }
         }
+
+        public class ValidateAsync : AddressServiceTests
+        {
+            AddressData address;
+            async Task<IEnumerable<ValidationFailure>> invoke() => await create().ValidateAsync( address );
+
+            static CountryMetadata country = new CountryMetadata { Id = "data/XW", Key = "XW", ChildRegionKeys = new string[] { "XX", "XA" } };
+            static ProvinceMetadata province = new ProvinceMetadata { Id = "data/XW/XX", Key = "XX", ChildRegionKeys = new string[] { "XY", "XA" } };
+            static LocalityMetadata locality = new LocalityMetadata { Id = "data/XW/XX/XY", Key = "XY", ChildRegionKeys = new string[] { "XZ", "XA" } };
+            static SublocalityMetadata sublocality = new SublocalityMetadata { Id = "data/XW/XX/XY/XZ", Key = "XZ" };
+
+            [Fact]
+            public async Task Requires_address()
+            {
+                address = null;
+                await Assert.ThrowsAsync<ArgumentNullException>( nameof(address), invoke );
+            }
+            
+            public static IEnumerable<object[]> GetTestCases()
+            {
+                yield return new object[] { null, null, null, null };
+                yield return new object[] { country, null, null, null };
+                yield return new object[] { country, province, null, null };
+                yield return new object[] { country, province, locality, null };
+                yield return new object[] { country, province, locality, sublocality };
+            }
+
+            [Theory]
+            [MemberData(nameof(GetTestCases))]
+            public async Task Returns_validatorResult( ICountryMetadata country, IProvinceMetadata province, ILocalityMetadata locality, ISublocalityMetadata sublocality )
+            {
+                address = new AddressData { Country = "XW", Province = "XX", Locality = "XY", Sublocality = "XZ" };
+                var expected = new ValidationFailure[3];
+                
+                if ( country is CountryMetadata cm ) MockClient.Setup( _=> _.Query<CountryMetadata>( cm.Id ) ).ReturnsAsync( cm ).Verifiable();
+                if ( province is ProvinceMetadata pm ) MockClient.Setup( _=> _.Query<ProvinceMetadata>( pm.Id ) ).ReturnsAsync( pm ).Verifiable();
+                if ( locality is LocalityMetadata lm ) MockClient.Setup( _ => _.Query<LocalityMetadata>( lm.Id ) ).ReturnsAsync( lm ).Verifiable();
+                if ( sublocality is SublocalityMetadata sm ) MockClient.Setup( _ => _.Query<SublocalityMetadata>( sm.Id ) ).ReturnsAsync( sm ).Verifiable();
+
+                MockValidator.Setup( _=> _.Validate( address, country, province, locality, sublocality ) ).Returns( expected ).Verifiable();
+
+                var actual = await invoke();
+                Assert.Same( expected, actual );
+
+                MockValidator.VerifyAll();
+                MockClient.VerifyAll();
+            }
+        }
     }
 }

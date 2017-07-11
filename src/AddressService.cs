@@ -148,9 +148,16 @@ namespace Fidget.Validation.Addresses
         /// <param name="address">Address to validate.</param>
         /// <returns>The collection of validation errors, if any.</returns>
         
-        public async Task<IEnumerable<ValidationFailure>> ValidateAsync( AddressData address )
+        public async Task<IEnumerable<ValidationFailure>> ValidateAsync( AddressData address, string language )
         {
-            throw new NotImplementedException();
+            if ( address == null ) throw new ArgumentNullException( nameof( address ) );
+
+            var country = address.Country != null ? await GetCountryAsync( address.Country, language ) : null;
+            var province = country.TryGetChildKey( address.Province, out string provinceKey ) ? await GetProvinceAsync( country.Key, provinceKey, language ) : null;
+            var locality = province.TryGetChildKey( address.Locality, out string localityKey ) ? await GetLocalityAsync( country.Key, province.Key, localityKey, language ) : null;
+            var sublocality = locality.TryGetChildKey( address.Sublocality, out string sublocalityKey ) ? await GetSublocalityAsync( country.Key, province.Key, locality.Key, sublocalityKey, language ) : null;
+            
+            return Validator.Validate( address, country, province, locality, sublocality );
         }
     }
 }

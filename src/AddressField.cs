@@ -8,6 +8,12 @@
     public enum AddressField
     {
         /// <summary>
+        /// Country field.
+        /// </summary>
+        
+        Country = 0,
+
+        /// <summary>
         /// Recipient name.
         /// </summary>
         

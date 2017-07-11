@@ -226,6 +226,7 @@ namespace Fidget.Validation.Addresses
         public class Validate : AddressServiceExtensionsTests
         {
             AddressData address;
+            string language = null;
             IEnumerable<ValidationFailure> invoke() => service.Validate( address );
 
             [Fact]
@@ -248,7 +249,7 @@ namespace Fidget.Validation.Addresses
                 var expected = new ValidationFailure[2];
                 address = new AddressData();
 
-                MockService.Setup( _=> _.ValidateAsync( address ) ).ReturnsAsync( expected ).Verifiable();
+                MockService.Setup( _=> _.ValidateAsync( address, language ) ).ReturnsAsync( expected ).Verifiable();
                 var actual = invoke();
 
                 Assert.Same( expected, actual );
