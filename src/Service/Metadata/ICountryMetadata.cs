@@ -35,7 +35,7 @@ namespace Fidget.Validation.Addresses.Service.Metadata
         /// Gets the address elements that should be uppercased for valid addresses in the country.
         /// </summary>
 
-        IEnumerable<char> Uppercase { get; }
+        IEnumerable<AddressField> Uppercase { get; }
 
         /// <summary>
         /// Gets the name used to describe the state/province level region in the country.

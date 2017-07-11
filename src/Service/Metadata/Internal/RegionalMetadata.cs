@@ -61,8 +61,8 @@ namespace Fidget.Validation.Addresses.Service.Metadata.Internal
         /// </remarks>
 
         [JsonProperty("require")]
-        [JsonConverter(typeof(CharacterCollectionConverter))]
-        public IEnumerable<char> Required { get; set; }
+        [JsonConverter(typeof(AddressFieldCollectionConverter))]
+        public IEnumerable<AddressField> Required { get; set; }
 
         /// <summary>
         /// Gets a regular expression pattern to use for validating the postal code.

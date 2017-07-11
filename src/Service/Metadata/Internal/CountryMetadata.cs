@@ -58,8 +58,8 @@ namespace Fidget.Validation.Addresses.Service.Metadata.Internal
         /// </summary>
         
         [JsonProperty("upper")]
-        [JsonConverter(typeof(CharacterCollectionConverter))]
-        public IEnumerable<char> Uppercase { get; set; }
+        [JsonConverter(typeof(AddressFieldCollectionConverter))]
+        public IEnumerable<AddressField> Uppercase { get; set; }
 
         /// <summary>
         /// Gets the name used to describe the state/province level region in the country.

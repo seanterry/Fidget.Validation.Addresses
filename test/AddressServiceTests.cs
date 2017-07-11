@@ -80,8 +80,8 @@ namespace Fidget.Validation.Addresses
             {
                 Id = "data/ZZ",
                 Format = "%N%n%O%n%A%n%C",
-                Required = "AC",
-                Uppercase = "C",
+                Required = new AddressField[] { AddressField.StreetAddress, AddressField.Locality },
+                Uppercase = new AddressField[] { AddressField.Locality },
                 StateType = "province",
                 LocalityType = "city",
                 SublocalityType = "suburb",
@@ -128,8 +128,8 @@ namespace Fidget.Validation.Addresses
             public static IEnumerable<object[]> GetFilledCountryValues()
             {
                 yield return new object[] { "XX", new CountryMetadata { Id = "data/XX", Format = Guid.NewGuid().ToString() } };
-                yield return new object[] { "XX", new CountryMetadata { Id = "data/XX", Required = Guid.NewGuid().ToString() } };
-                yield return new object[] { "XX", new CountryMetadata { Id = "data/XX", Uppercase = Guid.NewGuid().ToString() } };
+                yield return new object[] { "XX", new CountryMetadata { Id = "data/XX", Required = new AddressField[] { AddressField.StreetAddress, AddressField.Locality, AddressField.Province } } };
+                yield return new object[] { "XX", new CountryMetadata { Id = "data/XX", Uppercase = new AddressField[] { AddressField.Locality, AddressField.Sublocality } } };
                 yield return new object[] { "XX", new CountryMetadata { Id = "data/XX", StateType = Guid.NewGuid().ToString() } };
                 yield return new object[] { "XX", new CountryMetadata { Id = "data/XX", LocalityType = Guid.NewGuid().ToString() } };
                 yield return new object[] { "XX", new CountryMetadata { Id = "data/XX", SublocalityType = Guid.NewGuid().ToString() } };

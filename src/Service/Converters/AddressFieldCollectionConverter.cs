@@ -2,21 +2,18 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 
 namespace Fidget.Validation.Addresses.Service.Converters
 {
-    /// <summary>
-    /// Converter for handling collections of character data from the address service.
-    /// </summary>
-
-    class CharacterCollectionConverter : JsonConverter
+    public class AddressFieldCollectionConverter : JsonConverter
     {
         /// <summary>
         /// Returns whether the converter can handle properties of the given type.
         /// </summary>
         /// <param name="objectType">Target property type.</param>
 
-        public override bool CanConvert( Type objectType ) => objectType == typeof( IEnumerable<char> );
+        public override bool CanConvert( Type objectType ) => objectType == typeof( IEnumerable<AddressField> );
 
         /// <summary>
         /// Deserializes the property value.
@@ -29,8 +26,9 @@ namespace Fidget.Validation.Addresses.Service.Converters
         public override object ReadJson( JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer )
         {
             var source = serializer.Deserialize<string>( reader );
+            var chars = source?.ToCharArray();
 
-            return source?.ToCharArray();
+            return chars?.Select( _=> (AddressField)_ )?.ToArray();
         }
 
         /// <summary>
@@ -42,9 +40,9 @@ namespace Fidget.Validation.Addresses.Service.Converters
 
         public override void WriteJson( JsonWriter writer, object value, JsonSerializer serializer )
         {
-            if ( value is IEnumerable<char> collection )
+            if ( value is IEnumerable<AddressField> collection )
             {
-                serializer.Serialize( writer, new string( collection.ToArray() ) );
+                serializer.Serialize( writer, new string( collection.Select( _=> (char)_ ).ToArray() ) );
             }
 
             else if ( value != null )

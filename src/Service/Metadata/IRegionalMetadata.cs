@@ -25,7 +25,7 @@ namespace Fidget.Validation.Addresses.Service.Metadata
         /// If this value is null, the value from the parent region should be used.
         /// </summary>
         
-        IEnumerable<char> Required { get; }
+        IEnumerable<AddressField> Required { get; }
 
         /// <summary>
         /// Gets a regular expression pattern to use for validating the postal code.
