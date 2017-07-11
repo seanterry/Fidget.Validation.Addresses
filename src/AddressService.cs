@@ -4,6 +4,7 @@ using Fidget.Validation.Addresses.Service.Metadata.Internal;
 using Fidget.Validation.Addresses.Validation;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Fidget.Validation.Addresses
@@ -41,7 +42,7 @@ namespace Fidget.Validation.Addresses
         /// Constructs a service for address validation and metadata exploration.
         /// </summary>
         
-        public AddressService() : this( ServiceClient.Default, AddressValidator.Default ) {}
+        public AddressService() : this( ServiceClient.Default, GlobalAddressValidator.Default ) {}
 
         /// <summary>
         /// Returns gobal metadata information.
@@ -152,12 +153,13 @@ namespace Fidget.Validation.Addresses
         {
             if ( address == null ) throw new ArgumentNullException( nameof( address ) );
 
-            var country = address.Country != null ? await GetCountryAsync( address.Country, language ) : null;
+            var global = await GetGlobalAsync();
+            var country = global.Countries.Contains( address.Country, StringComparer.OrdinalIgnoreCase ) ? await GetCountryAsync( address.Country, language ) : null;
             var province = country.TryGetChildKey( address.Province, out string provinceKey ) ? await GetProvinceAsync( country.Key, provinceKey, language ) : null;
             var locality = province.TryGetChildKey( address.Locality, out string localityKey ) ? await GetLocalityAsync( country.Key, province.Key, localityKey, language ) : null;
             var sublocality = locality.TryGetChildKey( address.Sublocality, out string sublocalityKey ) ? await GetSublocalityAsync( country.Key, province.Key, locality.Key, sublocalityKey, language ) : null;
             
-            return Validator.Validate( address, country, province, locality, sublocality );
+            return Validator.Validate( address, global, country, province, locality, sublocality );
         }
     }
 }

@@ -2,10 +2,13 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace Fidget.Validation.Addresses.Service.Converters
 {
+    /// <summary>
+    /// Converter handling character arrays containing collections of address fields.
+    /// </summary>
+
     public class AddressFieldCollectionConverter : JsonConverter
     {
         /// <summary>

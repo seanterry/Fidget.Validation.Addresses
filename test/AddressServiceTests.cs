@@ -340,6 +340,7 @@ namespace Fidget.Validation.Addresses
             AddressData address;
             async Task<IEnumerable<ValidationFailure>> invoke() => await create().ValidateAsync( address );
 
+            static GlobalMetadata global = new GlobalMetadata { Id = "data", Countries = new string[] { "XW", "XA" } };
             static CountryMetadata country = new CountryMetadata { Id = "data/XW", Key = "XW", ChildRegionKeys = new string[] { "XX", "XA" } };
             static ProvinceMetadata province = new ProvinceMetadata { Id = "data/XW/XX", Key = "XX", ChildRegionKeys = new string[] { "XY", "XA" } };
             static LocalityMetadata locality = new LocalityMetadata { Id = "data/XW/XX/XY", Key = "XY", ChildRegionKeys = new string[] { "XZ", "XA" } };
@@ -368,12 +369,13 @@ namespace Fidget.Validation.Addresses
                 address = new AddressData { Country = "XW", Province = "XX", Locality = "XY", Sublocality = "XZ" };
                 var expected = new ValidationFailure[3];
                 
+                if ( global is GlobalMetadata gm ) MockClient.Setup( _=> _.Query<GlobalMetadata>( gm.Id ) ).ReturnsAsync( gm ).Verifiable();
                 if ( country is CountryMetadata cm ) MockClient.Setup( _=> _.Query<CountryMetadata>( cm.Id ) ).ReturnsAsync( cm ).Verifiable();
                 if ( province is ProvinceMetadata pm ) MockClient.Setup( _=> _.Query<ProvinceMetadata>( pm.Id ) ).ReturnsAsync( pm ).Verifiable();
                 if ( locality is LocalityMetadata lm ) MockClient.Setup( _ => _.Query<LocalityMetadata>( lm.Id ) ).ReturnsAsync( lm ).Verifiable();
                 if ( sublocality is SublocalityMetadata sm ) MockClient.Setup( _ => _.Query<SublocalityMetadata>( sm.Id ) ).ReturnsAsync( sm ).Verifiable();
 
-                MockValidator.Setup( _=> _.Validate( address, country, province, locality, sublocality ) ).Returns( expected ).Verifiable();
+                MockValidator.Setup( _=> _.Validate( address, global, country, province, locality, sublocality ) ).Returns( expected ).Verifiable();
 
                 var actual = await invoke();
                 Assert.Same( expected, actual );
