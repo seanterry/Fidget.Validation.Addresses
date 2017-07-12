@@ -27,8 +27,7 @@ namespace Fidget.Validation.Addresses.Service.Metadata
         /// <summary>
         /// Get an alternate value of <see cref="Format"/> to use when formatting an address in a latin script.
         /// </summary>
-        /// <remarks>
-        
+                
         string LatinFormat { get; }
 
         /// <summary>

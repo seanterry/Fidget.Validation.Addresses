@@ -28,6 +28,7 @@ namespace Fidget.Validation.Addresses
 
                 config.For<IMetadataAggregator>().Use<MetadataAggregator>().Singleton();
                 config.For<IAddressValidator>().Use<RequiredElementsValidator>().Singleton();
+                config.For<IAddressValidator>().DecorateAllWith<AllowedElementsValidator>().Singleton();
             }
 
             return new Container( configure );
