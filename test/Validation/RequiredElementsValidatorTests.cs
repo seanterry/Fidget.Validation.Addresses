@@ -1,5 +1,6 @@
 ﻿using Fidget.Validation.Addresses.Service.Metadata;
 using Fidget.Validation.Addresses.Service.Metadata.Internal;
+using Moq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,171 +11,112 @@ namespace Fidget.Validation.Addresses.Validation
 {
     public class RequiredElementsValidatorTests
     {
-        IAddressValidator create() => new RequiredElementsValidator();
+        Mock<IMetadataAggregator> MockAggregator = new Mock<IMetadataAggregator>();
+        IMetadataAggregator aggregator => MockAggregator?.Object;
+
+        IAddressValidator create() => new RequiredElementsValidator( aggregator );
+
+        public class Constructor : RequiredElementsValidatorTests
+        {
+            [Fact]
+            public void Requires_aggregator()
+            {
+                MockAggregator = null;
+                Assert.Throws<ArgumentNullException>( nameof(aggregator), ()=>create() );
+            }
+        }
 
         public class Validate : RequiredElementsValidatorTests
         {
-            static string random() => Guid.NewGuid().ToString();
-            AddressData address = new AddressData();
+            AddressData address;
+            IGlobalMetadata global = new GlobalMetadata();
+            ICountryMetadata country = new CountryMetadata();
+            IProvinceMetadata province = new ProvinceMetadata();
+            ILocalityMetadata locality = new LocalityMetadata();
+            ISublocalityMetadata sublocality = new SublocalityMetadata();
+            IEnumerable<ValidationFailure> invoke() => create().Validate( address, global, country, province, locality, sublocality );
 
-            IGlobalMetadata global = new GlobalMetadata { Id = "data", Countries = new string[] { "XW", "XA" } };
-            IEnumerable<ValidationFailure> invoke( ICountryMetadata country, IProvinceMetadata province, ILocalityMetadata locality, ISublocalityMetadata sublocality ) => create().Validate( address, global, country, province, locality, sublocality );
-            
-            [Fact]
-            public void Requires_address()
+            static readonly IEnumerable<AddressField> allFields = Enum.GetValues( typeof(AddressField) ).OfType<AddressField>().ToArray();
+
+            public class RequiredElementsData : TheoryData<AddressField,AddressData>
             {
-                address = null;
-                Assert.Throws<ArgumentNullException>( nameof( address ), () => invoke( null, null, null, null ) );
-            }
-
-            [Fact]
-            public void Requires_global()
-            {
-                global = null;
-                Assert.Throws<ArgumentNullException>( nameof( global ), () => invoke( null, null, null, null ) );
-            }
-            
-            [Theory]
-            [InlineData(null)]
-            [InlineData("")]
-            [InlineData("\t")]
-            public void WhenCountryEmpty_returns_failure( string value )
-            {
-                address.Country = value;
-                var expected = RequiredElementsValidator.Failures[AddressField.Country];
-                var actual = invoke( null, null, null, null );
-
-                Assert.Contains( expected, actual );
-            }
-
-            [Fact]
-            public void WhenCountryPresent_returns_valid()
-            {
-                address.Country = random();
-                var expected = RequiredElementsValidator.Failures[AddressField.Country];
-                var actual = invoke( null, null, null, null );
-
-                Assert.DoesNotContain( expected, actual );
-            }
-
-            static readonly AddressField[] AllRequiredFields = Enum.GetValues( typeof( AddressField ) ).OfType<AddressField>().ToArray();
-
-            /// <summary>
-            /// Matrix of conditions where a given field should be required, and the value to supply for testing.
-            /// </summary>
-            
-            public class RequiredFieldTheoryData : TheoryData<string,ICountryMetadata,IProvinceMetadata,ILocalityMetadata,ISublocalityMetadata>
-            {
-                public RequiredFieldTheoryData( AddressField field, params string[] values )
+                public RequiredElementsData( params string[] values )
                 {
-                    var target = new AddressField[] { field };
-                    var others = AllRequiredFields.Except( target );
-                    var empty = Enumerable.Empty<AddressField>();
-                    CountryMetadata country( IEnumerable<AddressField> required = null ) => new CountryMetadata { Required = required };
-                    ProvinceMetadata province( IEnumerable<AddressField> required = null ) => new ProvinceMetadata { Required = required };
-                    LocalityMetadata locality( IEnumerable<AddressField> required = null ) => new LocalityMetadata { Required = required };
-                    SublocalityMetadata sublocality( IEnumerable<AddressField> required = null ) => new SublocalityMetadata { Required = required };
-                    
                     foreach ( var value in values )
                     {
-                        // null metadata should still union the required values
-                        Add( value, country( target ), null, null, null );
-                        Add( value, null, province( target ), null, null );
-                        Add( value, null, null, locality( target ), null );
-                        Add( value, null, null, null, sublocality( target ) );
-
-                        // null required collections should still union the required values
-                        Add( value, country( target ), province(), locality(), sublocality() );
-                        Add( value, country(), province( target ), locality(), sublocality() );
-                        Add( value, country(), province(), locality( target ), sublocality() );
-                        Add( value, country(), province(), locality(), sublocality( target ) );
-
-                        // empty collections should still union the required values
-                        Add( value, country( target ), province( empty ), locality( empty ), sublocality( empty ) );
-                        Add( value, country( empty ), province( target ), locality( empty ), sublocality( empty ) );
-                        Add( value, country( empty ), province( empty ), locality( target ), sublocality( empty ) );
-                        Add( value, country( empty ), province( empty ), locality( empty ), sublocality( target ) );
-
-                        // presence of other required fields should not affect target value
-                        Add( value, country( target ), province( others ), locality( others ), sublocality( others ) );
-                        Add( value, country( others ), province( target ), locality( others ), sublocality( others ) );
-                        Add( value, country( others ), province( others ), locality( target ), sublocality( others ) );
-                        Add( value, country( others ), province( others ), locality( others ), sublocality( target ) );
+                        Add( AddressField.Country, new AddressData { Country = value } );
+                        Add( AddressField.Locality, new AddressData { Locality = value } );
+                        Add( AddressField.Name, new AddressData { Name = value } );
+                        Add( AddressField.Organization, new AddressData { Organization = value } );
+                        Add( AddressField.PostalCode, new AddressData { PostalCode = value } );
+                        Add( AddressField.Province, new AddressData { Province = value } );
+                        Add( AddressField.SortingCode, new AddressData { SortingCode = value } );
+                        Add( AddressField.StreetAddress, new AddressData { StreetAddress = value } );
+                        Add( AddressField.Sublocality, new AddressData { Sublocality = value } );
                     }
                 }
             }
             
-            public static RequiredFieldTheoryData ProvinceRequired_valueEmpty_Data = new RequiredFieldTheoryData( AddressField.Province, null, "", "\t" );
-
+            /// <summary>
+            /// When a required element has a null or whitespace value, it should fail validation.
+            /// </summary>
+            
             [Theory]
-            [MemberData(nameof(ProvinceRequired_valueEmpty_Data))]
-            public void WhenProvinceRequired_valueEmpty_returns_failure( string value, ICountryMetadata country, IProvinceMetadata province, ILocalityMetadata locality, ISublocalityMetadata sublocality )
+            [MemberData(nameof(RequiredElementsNullOrWhitespace_Data))]
+            public void WhenRequiredElement_NullOrWhitespace_Failure( AddressField field, AddressData address )
             {
-                address.Province = value;
-                var expected = RequiredElementsValidator.Failures[AddressField.Province];
-                var actual = invoke( country, province, locality, sublocality );
+                this.address = address;
+                MockAggregator.Setup( _=> _.GetRequiredFields( country, province, locality, sublocality ) ).Returns( new AddressField[] { field } ).Verifiable();
+
+                var expected = RequiredElementsValidator.Failures[field];
+                var actual = invoke();
                 Assert.Contains( expected, actual );
+
+                MockAggregator.VerifyAll();
             }
+            
+            public static RequiredElementsData RequiredElementsNullOrWhitespace_Data = new RequiredElementsData( null, "", "\t" );
 
-            public static RequiredFieldTheoryData ProvinceRequired_valuePresent_Data = new RequiredFieldTheoryData( AddressField.Province, random() );
-
+            /// <summary>
+            /// When a required element has a non-whitespace value, it should pass validation. 
+            /// </summary>
+            
             [Theory]
-            [MemberData( nameof( ProvinceRequired_valuePresent_Data ) )]
-            public void WhenProvinceRequired_valuePresent_returns_success( string value, ICountryMetadata country, IProvinceMetadata province, ILocalityMetadata locality, ISublocalityMetadata sublocality )
+            [MemberData( nameof(RequiredElementsValue) )]
+            public void WhenRequiredElement_HasValue_Pass( AddressField field, AddressData address )
             {
-                address.Province = value;
-                var expected = RequiredElementsValidator.Failures[AddressField.Province];
-                var actual = invoke( country, province, locality, sublocality );
+                this.address = address;
+                MockAggregator.Setup( _ => _.GetRequiredFields( country, province, locality, sublocality ) ).Returns( new AddressField[] { field } ).Verifiable();
+
+                var expected = RequiredElementsValidator.Failures[field];
+                var actual = invoke();
                 Assert.DoesNotContain( expected, actual );
+
+                MockAggregator.VerifyAll();
             }
 
-            public static RequiredFieldTheoryData LocalityRequired_valueEmpty_Data = new RequiredFieldTheoryData( AddressField.Locality, null, "", "\t" );
+            public static RequiredElementsData RequiredElementsValue = new RequiredElementsData( Guid.NewGuid().ToString() );
 
+            /// <summary>
+            /// When a non-required field contains any value, it should pass validation.
+            /// </summary>
+            
             [Theory]
-            [MemberData( nameof( LocalityRequired_valueEmpty_Data ) )]
-            public void WhenLocalityRequired_valueEmpty_returns_failure( string value, ICountryMetadata country, IProvinceMetadata province, ILocalityMetadata locality, ISublocalityMetadata sublocality )
+            [MemberData(nameof(NonRequiredElements))]
+            public void WhenNonRequiredElement_AnyValue_Pass( AddressField field, AddressData address )
             {
-                address.Locality = value;
-                var expected = RequiredElementsValidator.Failures[AddressField.Locality];
-                var actual = invoke( country, province, locality, sublocality );
-                Assert.Contains( expected, actual );
-            }
+                this.address = address;
+                var others = allFields.Except( new AddressField[] { field } );
+                MockAggregator.Setup( _ => _.GetRequiredFields( country, province, locality, sublocality ) ).Returns( others ).Verifiable();
 
-            public static RequiredFieldTheoryData LocalityRequired_valuePresent_Data = new RequiredFieldTheoryData( AddressField.Locality, random() );
-
-            [Theory]
-            [MemberData( nameof( LocalityRequired_valuePresent_Data ) )]
-            public void WhenLocalityRequired_valuePresent_returns_success( string value, ICountryMetadata country, IProvinceMetadata province, ILocalityMetadata locality, ISublocalityMetadata sublocality )
-            {
-                address.Locality = value;
-                var expected = RequiredElementsValidator.Failures[AddressField.Locality];
-                var actual = invoke( country, province, locality, sublocality );
+                var expected = RequiredElementsValidator.Failures[field];
+                var actual = invoke();
                 Assert.DoesNotContain( expected, actual );
+
+                MockAggregator.VerifyAll();
             }
 
-            public static RequiredFieldTheoryData SublocalityRequired_valueEmpty_Data = new RequiredFieldTheoryData( AddressField.Sublocality, null, "", "\t" );
-
-            [Theory]
-            [MemberData( nameof( SublocalityRequired_valueEmpty_Data ) )]
-            public void WhenSublocalityRequired_valueEmpty_returns_failure( string value, ICountryMetadata country, IProvinceMetadata province, ILocalityMetadata locality, ISublocalityMetadata sublocality )
-            {
-                address.Sublocality = value;
-                var expected = RequiredElementsValidator.Failures[AddressField.Sublocality];
-                var actual = invoke( country, province, locality, sublocality );
-                Assert.Contains( expected, actual );
-            }
-
-            public static RequiredFieldTheoryData SublocalityRequired_valuePresent_Data = new RequiredFieldTheoryData( AddressField.Locality, random() );
-
-            [Theory]
-            [MemberData( nameof( SublocalityRequired_valuePresent_Data ) )]
-            public void WhenSubocalityRequired_valuePresent_returns_success( string value, ICountryMetadata country, IProvinceMetadata province, ILocalityMetadata locality, ISublocalityMetadata sublocality )
-            {
-                address.Sublocality = value;
-                var expected = RequiredElementsValidator.Failures[AddressField.Sublocality];
-                var actual = invoke( country, province, locality, sublocality );
-                Assert.DoesNotContain( expected, actual );
-            }
+            public static RequiredElementsData NonRequiredElements = new RequiredElementsData( null, "", "\t", Guid.NewGuid().ToString() );
         }
     }
 }

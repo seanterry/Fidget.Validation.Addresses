@@ -10,8 +10,24 @@ namespace Fidget.Validation.Addresses.Validation
     /// Validator that ensures required elements are present in the address.
     /// </summary>
 
-    class RequiredElementsValidator : IAddressValidator
+    partial class RequiredElementsValidator : IAddressValidator
     {
+        /// <summary>
+        /// Metadata aggregator.
+        /// </summary>
+        
+        readonly IMetadataAggregator Aggregator;
+
+        /// <summary>
+        /// Constructs a validator that ensures that required elements are present in the address.
+        /// </summary>
+        /// <param name="aggregator">Metadata aggregator.</param>
+        
+        public RequiredElementsValidator( IMetadataAggregator aggregator )
+        {
+            Aggregator = aggregator ?? throw new ArgumentNullException( nameof(aggregator) );
+        }
+
         /// <summary>
         /// Collection of failures indexed by field type.
         /// </summary>
@@ -20,7 +36,7 @@ namespace Fidget.Validation.Addresses.Validation
             .OfType<AddressField>()
             .Select( _=> new ValidationFailure( _, AddressFieldError.MissingRequiredField ) )
             .ToDictionary( _=> _.Field );
-
+            
         /// <summary>
         /// Validates the given address.
         /// </summary>
@@ -32,12 +48,7 @@ namespace Fidget.Validation.Addresses.Validation
 
             var failures = new List<ValidationFailure>();
             var defaults = new AddressField[] { AddressField.Country };
-            var required = defaults
-                .Union( country?.Required ?? defaults )
-                .Union( province?.Required ?? defaults )
-                .Union( locality?.Required ?? defaults )
-                .Union( sublocality?.Required ?? defaults )
-                .Distinct();
+            var required = Aggregator.GetRequiredFields( country, province, locality, sublocality );
             
             void validate( AddressField field, string value ) 
             { 

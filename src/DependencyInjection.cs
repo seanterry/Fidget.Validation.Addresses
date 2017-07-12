@@ -26,6 +26,7 @@ namespace Fidget.Validation.Addresses
                 config.For<IServiceClient>().DecorateAllWith<NullifyingDecorator>().Singleton();
                 config.For<IServiceClient>().DecorateAllWith<CopyingDecorator>().Singleton();
 
+                config.For<IMetadataAggregator>().Use<MetadataAggregator>().Singleton();
                 config.For<IAddressValidator>().Use<RequiredElementsValidator>().Singleton();
             }
 
