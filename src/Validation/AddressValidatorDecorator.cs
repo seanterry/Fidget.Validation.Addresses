@@ -8,20 +8,20 @@ namespace Fidget.Validation.Addresses.Validation
     /// Defines an address validation decorator.
     /// </summary>
 
-    abstract class AddressValidatorDecorator : IAddressValidator
+    abstract class AddressValidatorDecorator : IAddressValidatorEx
     {
         /// <summary>
         /// Gets the address validator decorated by the current instance.
         /// </summary>
         
-        protected IAddressValidator Next { get; }
+        protected IAddressValidatorEx Next { get; }
 
         /// <summary>
         /// Initializes a new instance to decorate an address validator.
         /// </summary>
         /// <param name="next">Address validator decorated by the current instance.</param>
         
-        protected AddressValidatorDecorator( IAddressValidator next )
+        protected AddressValidatorDecorator( IAddressValidatorEx next )
         {
             Next = next ?? throw new ArgumentNullException( nameof(next) );
         }

@@ -6,7 +6,7 @@ namespace Fidget.Validation.Addresses
 {
     public class IntegrationTests
     {
-        static readonly IAddressService instance = new AddressService();
+        static readonly IAddressService instance = AddressService.Instance;
 
         public class Exploration : IntegrationTests
         {
@@ -16,28 +16,28 @@ namespace Fidget.Validation.Addresses
             string localityKey = "청주시";
             string sublocalityKey = "상당구";
         
-            [Fact]
+            //[Fact]
             public async Task GetCountry()
             {
                 var actual = await instance.GetCountryAsync( countryKey );
                 Assert.IsType<CountryMetadata>( actual );
             }
 
-            [Fact]
+            //[Fact]
             public async Task GetProvince()
             {
                 var actual = await instance.GetProvinceAsync( countryKey, provinceKey );
                 Assert.IsType<ProvinceMetadata>( actual );
             }
 
-            [Fact]
+            //[Fact]
             public async Task GetLocality()
             {
                 var actual = await instance.GetLocalityAsync( countryKey, provinceKey, localityKey );
                 Assert.IsType<LocalityMetadata>( actual );
             }
 
-            [Fact]
+            //[Fact]
             public async Task GetSublocality()
             {
                 var actual = await instance.GetSublocalityAsync( countryKey, provinceKey, localityKey, sublocalityKey );

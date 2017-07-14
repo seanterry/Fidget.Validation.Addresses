@@ -17,17 +17,7 @@ namespace Fidget.Validation.Addresses.Validation
         /// </summary>
         /// <param name="next">Validator decorated by the current instance.</param>
         
-        public AllowedElementsValidator( IAddressValidator next ) : base( next ) {}
-
-        /// <summary>
-        /// Collection of failures indexed by field type.
-        /// </summary>
-
-        internal static readonly IReadOnlyDictionary<AddressField, ValidationFailure> Failures = Enum.GetValues( typeof( AddressField ) )
-            .OfType<AddressField>()
-            .Where( _=> _ != AddressField.Country )
-            .Select( _ => new ValidationFailure( _, AddressFieldError.UnexpectedField ) )
-            .ToDictionary( _ => _.Field );
+        public AllowedElementsValidator( IAddressValidatorEx next ) : base( next ) {}
 
         /// <summary>
         /// Validates the given address.
@@ -46,7 +36,7 @@ namespace Fidget.Validation.Addresses.Validation
                 void validate( AddressField field, string value )
                 {
                     if ( !string.IsNullOrWhiteSpace( value ) && !format.Contains( $"%{(char)field}" ) )
-                        failures.Add( Failures[field] );
+                        failures.Add( new ValidationFailure( field, AddressFieldError.UnexpectedField ) );
                 }
 
                 validate( AddressField.Province, address.Province );

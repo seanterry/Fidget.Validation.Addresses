@@ -10,9 +10,9 @@ namespace Fidget.Validation.Addresses.Validation
 {
     public class AllowedElementsValidatorTests
     {
-        Mock<IAddressValidator> MockNext = new Mock<IAddressValidator>();
-        IAddressValidator next => MockNext?.Object;
-        IAddressValidator instance => new AllowedElementsValidator( next );
+        Mock<IAddressValidatorEx> MockNext = new Mock<IAddressValidatorEx>();
+        IAddressValidatorEx next => MockNext?.Object;
+        IAddressValidatorEx instance => new AllowedElementsValidator( next );
 
         public class Constructor : AllowedElementsValidatorTests
         {
@@ -64,7 +64,7 @@ namespace Fidget.Validation.Addresses.Validation
                 var country = new CountryMetadata { Format = string.Join( string.Empty, others ) };
                 MockNext.Setup( _ => _.Validate( address, global, country, province, locality, sublocality ) ).Returns( Enumerable.Empty<ValidationFailure>() ).Verifiable() ;
 
-                var expected = AllowedElementsValidator.Failures[field];
+                var expected = new ValidationFailure( field, AddressFieldError.UnexpectedField );
                 var actual = invoke( address, country );
 
                 Assert.DoesNotContain( expected, actual );
@@ -79,10 +79,11 @@ namespace Fidget.Validation.Addresses.Validation
                 var country = new CountryMetadata { Format = string.Join( string.Empty, others ) };
                 MockNext.Setup( _ => _.Validate( address, global, country, province, locality, sublocality ) ).Returns( Enumerable.Empty<ValidationFailure>() ).Verifiable();
 
-                var expected = AllowedElementsValidator.Failures[field];
+                var expected = new ValidationFailure( field, AddressFieldError.UnexpectedField );
                 var actual = invoke( address, country );
 
                 Assert.Contains( expected, actual );
+                Assert.Equal( AddressFieldError.UnexpectedField, expected.Error );
                 MockNext.VerifyAll();
             }
 
@@ -94,7 +95,7 @@ namespace Fidget.Validation.Addresses.Validation
                 var country = new CountryMetadata { Format = string.Join( string.Empty, format ) };
                 MockNext.Setup( _ => _.Validate( address, global, country, province, locality, sublocality ) ).Returns( Enumerable.Empty<ValidationFailure>() ).Verifiable();
 
-                var expected = AllowedElementsValidator.Failures[field];
+                var expected = new ValidationFailure( field, AddressFieldError.UnexpectedField );
                 var actual = invoke( address, country );
 
                 Assert.DoesNotContain( expected, actual );
@@ -125,7 +126,7 @@ namespace Fidget.Validation.Addresses.Validation
                 ICountryMetadata country = null;
                 MockNext.Setup( _ => _.Validate( address, global, country, province, locality, sublocality ) ).Returns( Enumerable.Empty<ValidationFailure>() ).Verifiable();
 
-                var expected = AllowedElementsValidator.Failures[field];
+                var expected = new ValidationFailure( field, AddressFieldError.UnexpectedField );
                 var actual = invoke( address, country );
 
                 Assert.DoesNotContain( expected, actual );
@@ -139,10 +140,23 @@ namespace Fidget.Validation.Addresses.Validation
                 var country = new CountryMetadata { Format = null };
                 MockNext.Setup( _ => _.Validate( address, global, country, province, locality, sublocality ) ).Returns( Enumerable.Empty<ValidationFailure>() ).Verifiable();
 
-                var expected = AllowedElementsValidator.Failures[field];
+                var expected = new ValidationFailure( field, AddressFieldError.UnexpectedField );
                 var actual = invoke( address, country );
 
                 Assert.DoesNotContain( expected, actual );
+                MockNext.VerifyAll();
+            }
+
+            [Fact]
+            public void Returns_PastFailures()
+            {
+                var address = new AddressData { Country = "ABC" };
+                var country = new CountryMetadata { Format = null };
+                var expected = allFields.Select( _=> new ValidationFailure( _, AddressFieldError.InvalidFormat ) );
+                MockNext.Setup( _ => _.Validate( address, global, country, province, locality, sublocality ) ).Returns( expected ).Verifiable();
+
+                var actual = invoke( address, country );
+                Assert.Equal( expected, actual );
                 MockNext.VerifyAll();
             }
         }

@@ -1,7 +1,6 @@
-﻿using System;
+﻿using Fidget.Validation.Addresses.Service.Metadata;
+using System;
 using System.Collections.Generic;
-using System.Text;
-using Fidget.Validation.Addresses.Service.Metadata;
 using System.Linq;
 
 namespace Fidget.Validation.Addresses.Validation
@@ -10,33 +9,10 @@ namespace Fidget.Validation.Addresses.Validation
     /// Validator that ensures required elements are present in the address.
     /// </summary>
 
-    partial class RequiredElementsValidator : IAddressValidator
+    partial class RequiredElementsValidator : IAddressValidatorEx
     {
-        /// <summary>
-        /// Metadata aggregator.
-        /// </summary>
-        
-        readonly IMetadataAggregator Aggregator;
+        internal static readonly IAddressValidatorEx Default = DependencyInjection.Container.GetInstance<IAddressValidatorEx>();
 
-        /// <summary>
-        /// Constructs a validator that ensures that required elements are present in the address.
-        /// </summary>
-        /// <param name="aggregator">Metadata aggregator.</param>
-        
-        public RequiredElementsValidator( IMetadataAggregator aggregator )
-        {
-            Aggregator = aggregator ?? throw new ArgumentNullException( nameof(aggregator) );
-        }
-
-        /// <summary>
-        /// Collection of failures indexed by field type.
-        /// </summary>
-        
-        internal static readonly IReadOnlyDictionary<AddressField,ValidationFailure> Failures = Enum.GetValues( typeof(AddressField) )
-            .OfType<AddressField>()
-            .Select( _=> new ValidationFailure( _, AddressFieldError.MissingRequiredField ) )
-            .ToDictionary( _=> _.Field );
-            
         /// <summary>
         /// Validates the given address.
         /// </summary>
@@ -48,12 +24,12 @@ namespace Fidget.Validation.Addresses.Validation
 
             var failures = new List<ValidationFailure>();
             var defaults = new AddressField[] { AddressField.Country };
-            var required = Aggregator.GetRequiredFields( country, province, locality, sublocality );
+            var required = Enumerable.Empty<AddressField>();
             
             void validate( AddressField field, string value ) 
             { 
                 if ( string.IsNullOrWhiteSpace( value ) && required.Contains( field ) ) 
-                    failures.Add( Failures[field] ); 
+                    failures.Add( new ValidationFailure( field, AddressFieldError.MissingRequiredField ) ); 
             }
 
             validate( AddressField.Country, address.Country );
