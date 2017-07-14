@@ -1,5 +1,4 @@
-﻿using Fidget.Validation.Addresses.Service.Metadata;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -9,22 +8,19 @@ namespace Fidget.Validation.Addresses.Validation
     /// Validator that ensures required elements are present in the address.
     /// </summary>
 
-    partial class RequiredElementsValidator : IAddressValidatorEx
+    partial class RequiredElementsValidator : IAddressValidator
     {
-        internal static readonly IAddressValidatorEx Default = DependencyInjection.Container.GetInstance<IAddressValidatorEx>();
-
         /// <summary>
         /// Validates the given address.
         /// </summary>
         
-        public IEnumerable<ValidationFailure> Validate( AddressData address, IGlobalMetadata global, ICountryMetadata country, IProvinceMetadata province, ILocalityMetadata locality, ISublocalityMetadata sublocality )
+        public IEnumerable<ValidationFailure> Validate( AddressData address, IValidationContext context )
         {
             if ( address == null ) throw new ArgumentNullException( nameof( address ) );
-            if ( global == null ) throw new ArgumentNullException( nameof( global ) );
-
+            if ( context == null ) throw new ArgumentNullException( nameof( context ) );
+            
             var failures = new List<ValidationFailure>();
-            var defaults = new AddressField[] { AddressField.Country };
-            var required = Enumerable.Empty<AddressField>();
+            var required = context.GetRequiredFields();
             
             void validate( AddressField field, string value ) 
             { 

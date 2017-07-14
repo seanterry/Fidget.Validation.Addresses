@@ -28,6 +28,8 @@ namespace Fidget.Validation.Addresses
                 config.For<IServiceClient>().DecorateAllWith<NullifyingDecorator>().Singleton();
                 config.For<IServiceClient>().DecorateAllWith<CopyingDecorator>().Singleton();
                 
+                config.For<IAddressValidator>().Use<RequiredElementsValidator>().Singleton();
+                config.For<IValidationContextFactory>().Use<ValidationContext.Factory>().Singleton();
                 config.For<IAddressService>().Use<AddressService.Implementation>().Singleton();
             }
 

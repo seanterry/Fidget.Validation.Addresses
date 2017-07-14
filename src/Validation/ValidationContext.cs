@@ -9,7 +9,7 @@ namespace Fidget.Validation.Addresses.Validation
     /// Context containing validation metadata.
     /// </summary>
     
-    class ValidationContext : IValidationContext
+    partial class ValidationContext : IValidationContext
     {
         /// <summary>
         /// Global metadata.

@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading.Tasks;
-using Fidget.Validation.Addresses.Service.Metadata;
-using Fidget.Validation.Addresses.Validation;
-
-namespace Fidget.Validation.Addresses
+﻿namespace Fidget.Validation.Addresses
 {
     /// <summary>
     /// Service for address validation and metadata exploration.

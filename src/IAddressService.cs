@@ -68,6 +68,24 @@ namespace Fidget.Validation.Addresses
         Task<ISublocalityMetadata> GetSublocalityAsync( string countryKey, string provinceKey, string localityKey, string sublocalityKey, string language = null );
 
         /// <summary>
+        /// Returns whether the given country identifier is known by the global metadata.
+        /// </summary>
+        /// <param name="global">Global metadata.</param>
+        /// <param name="value">Country identifier.</param>
+        /// <param name="countryKey">Key of the country, if found.</param>
+
+        bool TryGetCountryKey( IGlobalMetadata global, string value, out string countryKey );
+
+        /// <summary>
+        /// Returns whether the specified regional identifier is a child of the given parent region.
+        /// </summary>
+        /// <param name="parent">Parent region.</param>
+        /// <param name="value">Key, name, or latin name of the child region.</param>
+        /// <param name="key">Key of the child region, if found.</param>
+
+        bool TryGetChildKey( IHierarchicalMetadata parent, string value, out string key );
+
+        /// <summary>
         /// Validates the given address.
         /// </summary>
         /// <param name="address">Address to validate.</param>

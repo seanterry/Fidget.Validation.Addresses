@@ -37,6 +37,6 @@ namespace Fidget.Validation.Addresses.Validation
         /// <param name="next">The next validator in the sequence.</param>
         /// <returns>The collection of validation errors, if any.</returns>
         
-        IEnumerable<ValidationFailure> Validate( AddressData address, IValidationContext context, ValidationDelegate next );
+        IEnumerable<ValidationFailure> Validate( AddressData address, IValidationContext context );
     }
 }

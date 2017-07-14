@@ -5,7 +5,7 @@ using Fidget.Validation.Addresses.Validation;
 using Moq;
 using System;
 using System.Collections.Generic;
-using System.Text;
+using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -14,10 +14,11 @@ namespace Fidget.Validation.Addresses
     public class AddressServiceTests
     {
         Mock<IServiceClient> MockClient = new Mock<IServiceClient>();
+        Mock<IValidationContextFactory> MockFactory = new Mock<IValidationContextFactory>();
         IServiceClient client => MockClient?.Object;
-        IEnumerable<IAddressValidator> validators = new IAddressValidator[0];
-
-        IAddressService instance => new AddressService.Implementation( client, validators );
+        IValidationContextFactory factory => MockFactory?.Object;
+        
+        IAddressService instance => new AddressService.Implementation( client, factory );
 
         public class Constructor : AddressServiceTests
         {
@@ -29,10 +30,10 @@ namespace Fidget.Validation.Addresses
             }
 
             [Fact]
-            public void Requires_validators()
+            public void Requires_factory()
             {
-                validators = null;
-                Assert.Throws<ArgumentNullException>( nameof(validators), ()=>instance );
+                MockFactory = null;
+                Assert.Throws<ArgumentNullException>( nameof(factory), ()=>instance );
             }
         }
 
@@ -313,9 +314,137 @@ namespace Fidget.Validation.Addresses
             }
         }
 
+        public class TryGetCountryKey : AddressServiceTests
+        {
+            public static IEnumerable<object[]> CountryNotInGlobalCases()
+            {
+                var values = new string[] { null, string.Empty, "XB" };
+                var globals = new GlobalMetadata[]
+                {
+                    null,
+                    new GlobalMetadata { Countries = null },
+                    new GlobalMetadata { Countries = new string[0] },
+                    new GlobalMetadata { Countries = new string[] { "XW", "XA" } },
+                };
+
+                return
+                    from value in values
+                    from global in globals
+                    select new object[] { global, value };
+            }
+
+            [Theory]
+            [MemberData(nameof(CountryNotInGlobalCases))]
+            public void WhenCountryNotInGlobal_returns_false( IGlobalMetadata global, string value )
+            {
+                var actual = instance.TryGetCountryKey( global, value, out string countryKey );
+                Assert.False( actual );
+                Assert.Null( countryKey );
+            }
+
+            [Fact]
+            public void WhenCountryInGlobal_returns_true()
+            {
+                var global = new GlobalMetadata { Countries = new string[] { "XW", "XA" } };
+                var value = "XW";
+                var actual = instance.TryGetCountryKey( global, value, out string countryKey );
+
+                Assert.True( actual );
+                Assert.Equal( value, countryKey );
+            }
+        }
+
+        public class TryGetChildKey : AddressServiceTests
+        {
+            public static IEnumerable<object[]> ChildNotInParentCases()
+            {
+                var values = new string[] { null, string.Empty, "XB" };
+                var collections = new IEnumerable<string>[]
+                {
+                    null,
+                    new string[0],
+                    new string[] { "XX", "XA" },
+                };
+
+                return
+                    from keys in collections
+                    from value in values
+                    select new object[] { new CountryMetadata { ChildRegionKeys = keys, ChildRegionNames = keys, ChildRegionLatinNames = keys }, value };
+            }
+
+            [Theory]
+            [MemberData(nameof(ChildNotInParentCases))]
+            public void WhenChildNotInParent_returns_false( IHierarchicalMetadata parent, string value )
+            {
+                var actual = instance.TryGetChildKey( parent, value, out string key );
+                Assert.False( actual );
+                Assert.Null( key );
+            }
+
+            [Fact]
+            public void WhenChildInKeys_returns_true()
+            {
+                var parent = new CountryMetadata { ChildRegionKeys = new string[] { "XW", "XA" } };
+                var expected = "XA";
+                var result = instance.TryGetChildKey( parent, expected, out string actual );
+
+                Assert.True( result );
+                Assert.Equal( expected, actual );
+            }
+
+            public static IEnumerable<object[]> ChildInParentNamesCases()
+            {
+                string random() => Guid.NewGuid().ToString();
+                var value = random();
+
+                var keys = new string[] { "XX", "XW", "XA" };
+                var names = new string[] { value, value.ToLowerInvariant(), value.ToUpperInvariant() };
+                var opposing = new string[][] { null, new string[0], new string[] { random(), random(), random() } };
+
+                return
+                    from name in names
+                    from other in opposing
+                    select new object[] { value, keys, new string[] { random(), name, random() }, other };
+            }
+
+            [Theory]
+            [MemberData(nameof(ChildInParentNamesCases),DisableDiscoveryEnumeration =true)]
+            public void WhenChildInNames_returns_true( string value, string[] keys, string[] names, string[] other )
+            {
+                var parent = new CountryMetadata 
+                { 
+                    ChildRegionKeys = keys ,
+                    ChildRegionNames = names,
+                    ChildRegionLatinNames = other,
+                };
+                 
+                var result = instance.TryGetChildKey( parent, value, out string actual );
+
+                Assert.True( result );
+                Assert.Equal( "XW", actual );
+            }
+
+            [Theory]
+            [MemberData( nameof( ChildInParentNamesCases ), DisableDiscoveryEnumeration = true )]
+            public void WhenChildInLatinNames_returns_true( string value, string[] keys, string[] names, string[] other )
+            {
+                var parent = new CountryMetadata
+                {
+                    ChildRegionKeys = keys,
+                    ChildRegionNames = other,
+                    ChildRegionLatinNames = names,
+                };
+
+                var result = instance.TryGetChildKey( parent, value, out string actual );
+
+                Assert.True( result );
+                Assert.Equal( "XW", actual );
+            }
+        }
+
         public class ValidateAsync : AddressServiceTests
         {
-            AddressData address;
+            AddressData address = new AddressData();
             string language = Guid.NewGuid().ToString();
             async Task<IEnumerable<ValidationFailure>> invoke() => await instance.ValidateAsync( address, language );
             
@@ -324,6 +453,32 @@ namespace Fidget.Validation.Addresses
             {
                 address = null;
                 await Assert.ThrowsAsync<ArgumentNullException>( nameof( address ), invoke );
+            }
+
+            Mock<IValidationContext> MockContext = new Mock<IValidationContext>();
+            IValidationContext context => MockContext?.Object;
+
+            Mock<IAddressValidator> MockValidator1 = new Mock<IAddressValidator>();
+            Mock<IAddressValidator> MockValidator2 = new Mock<IAddressValidator>();
+
+            [Fact]
+            public async Task Returns_collectionOfFailures()
+            {
+                var current = instance;
+                var expected = new ValidationFailure[]
+                {
+                    new ValidationFailure( AddressField.PostalCode, AddressFieldError.InvalidFormat ),
+                    new ValidationFailure( AddressField.Province, AddressFieldError.UnkownValue ),
+                    new ValidationFailure( AddressField.StreetAddress, AddressFieldError.MissingRequiredField ),
+                };
+
+                MockFactory.SetupGet( _ => _.Validators ).Returns( new IAddressValidator[] { MockValidator1.Object, MockValidator2.Object } );
+                MockFactory.Setup( _ => _.Create( address, current, language ) ).ReturnsAsync( context );
+                MockValidator1.Setup( _=> _.Validate( address, context ) ).Returns( expected.Take(2) );
+                MockValidator2.Setup( _=> _.Validate( address, context ) ).Returns( expected.Skip(2) );
+
+                var actual = await current.ValidateAsync( address, language );
+                Assert.Equal( expected, actual );
             }
         }
     }

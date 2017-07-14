@@ -1,11 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Fidget.Validation.Addresses.Service;
 using Fidget.Validation.Addresses.Service.Metadata;
-using Fidget.Validation.Addresses.Validation;
-using Fidget.Validation.Addresses.Service;
 using Fidget.Validation.Addresses.Service.Metadata.Internal;
+using Fidget.Validation.Addresses.Validation;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Fidget.Validation.Addresses
 {
@@ -24,10 +24,10 @@ namespace Fidget.Validation.Addresses
             readonly IServiceClient Client;
 
             /// <summary>
-            /// Collection of address validators.
+            /// Factory for creating validation contexts.
             /// </summary>
             
-            readonly IEnumerable<IAddressValidator> Validators;
+            readonly IValidationContextFactory Factory;
 
             /// <summary>
             /// Constructs an implementation of the address service.
@@ -35,10 +35,10 @@ namespace Fidget.Validation.Addresses
             /// <param name="client">Service client.</param>
             /// <param name="validators">Collection of address validators.</param>
             
-            public Implementation( IServiceClient client, IEnumerable<IAddressValidator> validators )
+            public Implementation( IServiceClient client, IValidationContextFactory factory )
             {
                 Client = client ?? throw new ArgumentNullException( nameof(client) );
-                Validators = validators ?? throw new ArgumentNullException( nameof(validators) );
+                Factory = factory ?? throw new ArgumentNullException( nameof(factory) );
             }
 
             /// <summary>
@@ -82,7 +82,7 @@ namespace Fidget.Validation.Addresses
 
                 return result;
             }
-
+            
             /// <summary>
             /// Returns metadata for the specified province if it is available.
             /// </summary>
@@ -141,6 +141,54 @@ namespace Fidget.Validation.Addresses
             }
 
             /// <summary>
+            /// Returns whether the given country identifier is known by the global metadata.
+            /// </summary>
+            /// <param name="global">Global metadata.</param>
+            /// <param name="value">Country identifier.</param>
+            /// <param name="countryKey">Key of the country, if found.</param>
+            
+            public bool TryGetCountryKey( IGlobalMetadata global, string value, out string countryKey )
+            {
+                countryKey = global?.Countries?.Contains( value ) == true
+                    ? value
+                    : null;
+
+                return countryKey != null;
+            }
+
+            /// <summary>
+            /// Returns whether the specified regional identifier is a child of the given parent region.
+            /// </summary>
+            /// <param name="parent">Parent region.</param>
+            /// <param name="value">Key, name, or latin name of the child region.</param>
+            /// <param name="key">Key of the child region, if found.</param>
+            
+            public bool TryGetChildKey( IHierarchicalMetadata parent, string value, out string key )
+            {
+                int? getKeyIndex( params IEnumerable<string>[] collections )
+                {
+                    foreach ( var collection in collections )
+                    {
+                        var candidate = collection != null
+                            ? Array.FindIndex( collection as string[] ?? collection?.ToArray(), _ => _.Equals( value, StringComparison.OrdinalIgnoreCase ) )
+                            : (int?)null;
+
+                        if ( candidate >= 0 ) return candidate;
+                    }
+
+                    return null;
+                }
+
+                var index = getKeyIndex( parent?.ChildRegionKeys, parent?.ChildRegionNames, parent?.ChildRegionLatinNames );
+
+                key = index.HasValue
+                    ? parent.ChildRegionKeys.ElementAtOrDefault( index.Value )
+                    : null;
+
+                return key != null;
+            }
+
+            /// <summary>
             /// Validates the given address.
             /// </summary>
             /// <param name="address">Address to validate.</param>
@@ -150,9 +198,10 @@ namespace Fidget.Validation.Addresses
             {
                 if ( address == null ) throw new ArgumentNullException( nameof( address ) );
 
-                var global = await GetGlobalAsync();
+                var context = await Factory.Create( address, this, language );
+                var failures = Factory.Validators.SelectMany( _=> _.Validate( address, context ) );
                 
-                throw new NotImplementedException();
+                return failures.ToArray();
             }
         }
     }
