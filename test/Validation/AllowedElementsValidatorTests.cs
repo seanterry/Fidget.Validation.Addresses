@@ -1,6 +1,4 @@
-﻿using Fidget.Validation.Addresses.Service.Metadata;
-using Fidget.Validation.Addresses.Service.Metadata.Internal;
-using Moq;
+﻿using Moq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,154 +8,142 @@ namespace Fidget.Validation.Addresses.Validation
 {
     public class AllowedElementsValidatorTests
     {
-        Mock<IAddressValidatorEx> MockNext = new Mock<IAddressValidatorEx>();
-        IAddressValidatorEx next => MockNext?.Object;
-        IAddressValidatorEx instance => new AllowedElementsValidator( next );
-
-        public class Constructor : AllowedElementsValidatorTests
-        {
-            [Fact]
-            public void Requires_next()
-            {
-                MockNext = null;
-                Assert.Throws<ArgumentNullException>( nameof(next), ()=>instance );
-            }
-        }
+        IAddressValidator instance => new AllowedElementsValidator();
 
         public class Validate : AllowedElementsValidatorTests
         {
-            IGlobalMetadata global = new GlobalMetadata();
-            IProvinceMetadata province = new ProvinceMetadata();
-            ILocalityMetadata locality = new LocalityMetadata();
-            ISublocalityMetadata sublocality = new SublocalityMetadata();
+            static string random() => Guid.NewGuid().ToString();
 
-            IEnumerable<ValidationFailure> invoke( AddressData address, ICountryMetadata country ) => instance.Validate( address, global, country, province, locality, sublocality );
-
-            public class AllowedElementsData : TheoryData<AddressField,AddressData>
+            AddressData address = new AddressData
             {
-                public AllowedElementsData( params string[] values )
-                {
-                    foreach ( var value in values )
-                    {
-                        Add( AddressField.Locality, new AddressData { Locality = value } );
-                        Add( AddressField.Name, new AddressData { Name = value } );
-                        Add( AddressField.Organization, new AddressData { Organization = value } );
-                        Add( AddressField.PostalCode, new AddressData { PostalCode = value } );
-                        Add( AddressField.Province, new AddressData { Province = value } );
-                        Add( AddressField.SortingCode, new AddressData { SortingCode = value } );
-                        Add( AddressField.StreetAddress, new AddressData { StreetAddress = value } );
-                        Add( AddressField.Sublocality, new AddressData { Sublocality = value } );
-                    }
-                }
+                Country = random(),
+                Province = random(),
+                Locality = random(),
+                Sublocality = random(),
+                Name = random(),
+                Organization = random(),
+                PostalCode = random(),
+                SortingCode = random(),
+                StreetAddress = random(),
+            };
+
+            Mock<IValidationContext> MockContext = new Mock<IValidationContext>();
+            IValidationContext context => MockContext?.Object;
+
+            IEnumerable<ValidationFailure> invoke() => instance.Validate( address, context );
+
+            [Fact]
+            public void Requires_address()
+            {
+                address = null;
+                Assert.Throws<ArgumentNullException>( nameof( address ), () => invoke() );
             }
 
-            public static AllowedElementsData ElementsWithWhitespace = new AllowedElementsData( null, "", "\t" );
-            public static AllowedElementsData ElementsWithValues = new AllowedElementsData( Guid.NewGuid().ToString() );
-            public static AllowedElementsData ElementsWithAny = new AllowedElementsData( null, "", "\t", Guid.NewGuid().ToString() );
-            static readonly IEnumerable<AddressField> allFields = Enum.GetValues( typeof( AddressField ) ).OfType<AddressField>().ToArray();
-
-            [Theory]
-            [MemberData(nameof(ElementsWithWhitespace))]
-            public void WhenFieldNotAllowed_valueIsWhitespace_Pass( AddressField field, AddressData address )
+            [Fact]
+            public void Requires_context()
             {
-                var others = allFields.Where( _=> _ != field ).Select( _=> $"%{(char)_}" ).ToArray();
-                var country = new CountryMetadata { Format = string.Join( string.Empty, others ) };
-                MockNext.Setup( _ => _.Validate( address, global, country, province, locality, sublocality ) ).Returns( Enumerable.Empty<ValidationFailure>() ).Verifiable() ;
-
-                var expected = new ValidationFailure( field, AddressFieldError.UnexpectedField );
-                var actual = invoke( address, country );
-
-                Assert.DoesNotContain( expected, actual );
-                MockNext.VerifyAll();
+                MockContext = null;
+                Assert.Throws<ArgumentNullException>( nameof( context ), () => invoke() );
             }
 
-            [Theory]
-            [MemberData( nameof( ElementsWithValues ) )]
-            public void WhenFieldNotAllowed_valueIsNotWhitespace_Fail( AddressField field, AddressData address )
+            [Fact]
+            public void WhenAllFieldsEmpty_returns_empty()
             {
-                var others = allFields.Where( _ => _ != field ).Select( _ => $"%{(char)_}" ).ToArray();
-                var country = new CountryMetadata { Format = string.Join( string.Empty, others ) };
-                MockNext.Setup( _ => _.Validate( address, global, country, province, locality, sublocality ) ).Returns( Enumerable.Empty<ValidationFailure>() ).Verifiable();
+                address = new AddressData();
+                var fields = Enum.GetValues( typeof( AddressField ) ).OfType<AddressField>();
+                MockContext.Setup( _ => _.GetRequiredFields() ).Returns( fields );
 
-                var expected = new ValidationFailure( field, AddressFieldError.UnexpectedField );
-                var actual = invoke( address, country );
-
-                Assert.Contains( expected, actual );
-                Assert.Equal( AddressFieldError.UnexpectedField, expected.Error );
-                MockNext.VerifyAll();
+                var expected = Enumerable.Empty<ValidationFailure>();
+                var actual = invoke();
+                Assert.Equal( expected, actual );
             }
 
-            [Theory]
-            [MemberData( nameof( ElementsWithAny ) )]
-            public void WhenFieldAllowed_Pass( AddressField field, AddressData address )
-            {
-                var format = allFields.Select( _ => $"%{(char)_}" ).ToArray();
-                var country = new CountryMetadata { Format = string.Join( string.Empty, format ) };
-                MockNext.Setup( _ => _.Validate( address, global, country, province, locality, sublocality ) ).Returns( Enumerable.Empty<ValidationFailure>() ).Verifiable();
-
-                var expected = new ValidationFailure( field, AddressFieldError.UnexpectedField );
-                var actual = invoke( address, country );
-
-                Assert.DoesNotContain( expected, actual );
-                MockNext.VerifyAll();
-            }
+            delegate void MutatorDelegate( AddressData address, string value );
 
             /// <summary>
-            /// Country is always allowed (since it is always required).
+            /// Mutators for setting address property values.
             /// </summary>
-            
-            [Fact]
-            public void WhenCountryHasValue_Pass()
+
+            static readonly IReadOnlyDictionary<AddressField, MutatorDelegate> Mutators = new Dictionary<AddressField, MutatorDelegate>
             {
-                var country = new CountryMetadata { Format = string.Empty };
-                var address = new AddressData { Country = Guid.NewGuid().ToString() };
-                MockNext.Setup( _ => _.Validate( address, global, country, province, locality, sublocality ) ).Returns( Enumerable.Empty<ValidationFailure>() ).Verifiable();
+                { AddressField.Country, ( a, v ) => a.Country = v },
+                { AddressField.Locality, ( a, v ) => a.Locality = v },
+                { AddressField.Name, ( a, v ) => a.Name = v },
+                { AddressField.Organization, ( a, v ) => a.Organization = v },
+                { AddressField.PostalCode, ( a, v ) => a.PostalCode = v },
+                { AddressField.Province, ( a, v ) => a.Province = v },
+                { AddressField.SortingCode, ( a, v ) => a.SortingCode = v },
+                { AddressField.StreetAddress, ( a, v ) => a.StreetAddress = v },
+                { AddressField.Sublocality, ( a, v ) => a.Sublocality = v },
+            };
 
-                var actual = invoke( address, country );
+            public static IEnumerable<object[]> EmptyFieldsCases()
+            {
+                var fields = Mutators.Keys;
+                var values = new string[] { null, string.Empty, "\t" };
 
-                Assert.DoesNotContain( actual, _=> _.Field == AddressField.Country );
-                MockNext.VerifyAll();
+                return
+                    from field in fields
+                    from value in values
+                    select new object[] { field, value };
             }
 
             [Theory]
-            [MemberData( nameof( ElementsWithAny ) )]
-            public void WhenCountryNull_Pass( AddressField field, AddressData address )
+            [MemberData( nameof( EmptyFieldsCases ) )]
+            public void WhenAllowedFieldEmpty_returns_pass( AddressField field, string value )
             {
-                ICountryMetadata country = null;
-                MockNext.Setup( _ => _.Validate( address, global, country, province, locality, sublocality ) ).Returns( Enumerable.Empty<ValidationFailure>() ).Verifiable();
+                Mutators[field].Invoke( address, value );
+                MockContext.Setup( _ => _.GetAllowedFields() ).Returns( new AddressField[] { field } );
 
                 var expected = new ValidationFailure( field, AddressFieldError.UnexpectedField );
-                var actual = invoke( address, country );
-
+                var actual = invoke();
                 Assert.DoesNotContain( expected, actual );
-                MockNext.VerifyAll();
             }
 
             [Theory]
-            [MemberData( nameof( ElementsWithAny ) )]
-            public void WhenFormatNull_Pass( AddressField field, AddressData address )
+            [MemberData( nameof( EmptyFieldsCases ) )]
+            public void WhenFieldNotAllowedEmpty_returns_pass( AddressField field, string value )
             {
-                var country = new CountryMetadata { Format = null };
-                MockNext.Setup( _ => _.Validate( address, global, country, province, locality, sublocality ) ).Returns( Enumerable.Empty<ValidationFailure>() ).Verifiable();
+                var allowed = Enum.GetValues( typeof( AddressField ) ).OfType<AddressField>().Where( _ => _ != field );
+                Mutators[field].Invoke( address, value );
+                MockContext.Setup( _ => _.GetAllowedFields() ).Returns( allowed );
 
                 var expected = new ValidationFailure( field, AddressFieldError.UnexpectedField );
-                var actual = invoke( address, country );
+                var actual = invoke();
 
                 Assert.DoesNotContain( expected, actual );
-                MockNext.VerifyAll();
             }
 
-            [Fact]
-            public void Returns_PastFailures()
-            {
-                var address = new AddressData { Country = "ABC" };
-                var country = new CountryMetadata { Format = null };
-                var expected = allFields.Select( _=> new ValidationFailure( _, AddressFieldError.InvalidFormat ) );
-                MockNext.Setup( _ => _.Validate( address, global, country, province, locality, sublocality ) ).Returns( expected ).Verifiable();
+            public static IEnumerable<object[]> FilledFieldsCases() => Mutators.Keys
+                .Select( _ => new object[] { _ } );
 
-                var actual = invoke( address, country );
-                Assert.Equal( expected, actual );
-                MockNext.VerifyAll();
+            [Theory]
+            [MemberData( nameof( FilledFieldsCases ) )]
+            public void WhenAllowedFieldFilled_returns_pass( AddressField field )
+            {
+                address = new AddressData();
+                Mutators[field].Invoke( address, random() );
+                MockContext.Setup( _ => _.GetAllowedFields() ).Returns( new AddressField[] { field } );
+
+                var expected = new ValidationFailure( field, AddressFieldError.UnexpectedField );
+                var actual = invoke();
+
+                Assert.DoesNotContain( expected, actual );
+            }
+
+            [Theory]
+            [MemberData(nameof(FilledFieldsCases))]
+            public void WhenNotAllowedFieldFilled_returns_failure( AddressField field )
+            {
+                var allowed = Enum.GetValues( typeof( AddressField ) ).OfType<AddressField>().Where( _ => _ != field );
+                address = new AddressData();
+                Mutators[field].Invoke( address, random() );
+                MockContext.Setup( _ => _.GetAllowedFields() ).Returns( allowed );
+
+                var expected = new ValidationFailure( field, AddressFieldError.UnexpectedField );
+                var actual = invoke();
+
+                Assert.Contains( expected, actual );
             }
         }
     }

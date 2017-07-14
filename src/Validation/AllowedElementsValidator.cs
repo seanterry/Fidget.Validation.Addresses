@@ -10,44 +10,35 @@ namespace Fidget.Validation.Addresses.Validation
     /// Validates elements that are allowed in an address.
     /// </summary>
     
-    class AllowedElementsValidator : AddressValidatorDecorator
+    class AllowedElementsValidator : IAddressValidator
     {
-        /// <summary>
-        /// Constructs an instance to validate elements that are allowed in an address.
-        /// </summary>
-        /// <param name="next">Validator decorated by the current instance.</param>
-        
-        public AllowedElementsValidator( IAddressValidatorEx next ) : base( next ) {}
-
         /// <summary>
         /// Validates the given address.
         /// </summary>
 
-        public override IEnumerable<ValidationFailure> Validate( AddressData address, IGlobalMetadata global, ICountryMetadata country, IProvinceMetadata province, ILocalityMetadata locality, ISublocalityMetadata sublocality )
+        public IEnumerable<ValidationFailure> Validate( AddressData address, IValidationContext context )
         {
             if ( address == null ) throw new ArgumentNullException( nameof( address ) );
+            if ( context == null ) throw new ArgumentNullException( nameof( context ) );
 
-            var failures = Next
-                .Validate( address, global, country, province, locality, sublocality )
-                .ToList();
+            var failures = new List<ValidationFailure>();
+            var allowed = context.GetAllowedFields();
 
-            if ( country?.Format is string format )
+            void validate( AddressField field, string value )
             {
-                void validate( AddressField field, string value )
-                {
-                    if ( !string.IsNullOrWhiteSpace( value ) && !format.Contains( $"%{(char)field}" ) )
-                        failures.Add( new ValidationFailure( field, AddressFieldError.UnexpectedField ) );
-                }
-
-                validate( AddressField.Province, address.Province );
-                validate( AddressField.Locality, address.Locality );
-                validate( AddressField.Sublocality, address.Sublocality );
-                validate( AddressField.PostalCode, address.PostalCode );
-                validate( AddressField.SortingCode, address.SortingCode );
-                validate( AddressField.StreetAddress, address.StreetAddress );
-                validate( AddressField.Organization, address.Organization );
-                validate( AddressField.Name, address.Name );
+                if ( !string.IsNullOrWhiteSpace( value ) && !allowed.Contains( field ) )
+                    failures.Add( new ValidationFailure( field, AddressFieldError.UnexpectedField ) );
             }
+
+            validate( AddressField.Country, address.Country );
+            validate( AddressField.Province, address.Province );
+            validate( AddressField.Locality, address.Locality );
+            validate( AddressField.Sublocality, address.Sublocality );
+            validate( AddressField.PostalCode, address.PostalCode );
+            validate( AddressField.SortingCode, address.SortingCode );
+            validate( AddressField.StreetAddress, address.StreetAddress );
+            validate( AddressField.Organization, address.Organization );
+            validate( AddressField.Name, address.Name );
 
             return failures;
         }

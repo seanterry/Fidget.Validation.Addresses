@@ -13,5 +13,11 @@ namespace Fidget.Validation.Addresses.Validation
         /// </summary>
 
         IEnumerable<AddressField> GetRequiredFields();
+
+        /// <summary>
+        /// Returns the elements that are allowed in a valid address for the country.
+        /// </summary>
+
+        IEnumerable<AddressField> GetAllowedFields();
     }
 }

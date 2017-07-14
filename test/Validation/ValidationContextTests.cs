@@ -12,7 +12,7 @@ namespace Fidget.Validation.Addresses.Validation
     public class ValidationContextTests
     {
         IGlobalMetadata global = new GlobalMetadata();
-        ICountryMetadata country = new CountryMetadata();
+        CountryMetadata country = new CountryMetadata();
         IProvinceMetadata province = new ProvinceMetadata();
         ILocalityMetadata locality = new LocalityMetadata();
         ISublocalityMetadata sublocality = new SublocalityMetadata();
@@ -159,6 +159,49 @@ namespace Fidget.Validation.Addresses.Validation
                 }
 
                 Output.WriteLine( $"{cases} test cases" );
+            }
+        }
+
+        public class GetAllowedFields : ValidationContextTests
+        {
+            [Theory]
+            [InlineData(null)]
+            [InlineData("")]
+            [InlineData("\t")]
+            public void Country_alwaysAllowed( string format )
+            {
+                country.Format = format;
+                var actual = instance.GetAllowedFields();
+                Assert.Contains( AddressField.Country, actual );
+            }
+
+            static readonly IEnumerable<AddressField> all = Enum.GetValues( typeof( AddressField ) )
+                .OfType<AddressField>()
+                .ToArray();
+
+            // excludes country since it is a special case
+            public static IEnumerable<object[]> FieldCases() => all
+                .Where( _=> _ != AddressField.Country )
+                .Select( field => new object[] { field, $"%{(char)field}" } );
+            
+            [Theory]
+            [MemberData(nameof(FieldCases))]
+            public void WhenFieldInFormat_returnsAllowed( AddressField field, string format )
+            {
+                country.Format = format;
+                var actual = instance.GetAllowedFields();
+                Assert.Contains( field, actual );
+            }
+
+            [Theory]
+            [MemberData(nameof(FieldCases))]
+            public void WhenFieldNotInFormat_returnsNotAllowed( AddressField field, string format )
+            {
+                var others = all.Where( _=> _ != field ).ToArray();
+                country.Format = string.Concat( others.Select( _=> $"%{(char)_}" ) );
+                var actual = instance.GetAllowedFields();
+                Assert.DoesNotContain( field, actual );
+                Assert.Equal( others, actual );
             }
         }
     }

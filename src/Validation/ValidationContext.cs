@@ -77,5 +77,14 @@ namespace Fidget.Validation.Addresses.Validation
             .Union( Sublocality?.Required ?? DefaultRequiredElements )
             .Distinct()
             .ToArray();
+
+        /// <summary>
+        /// Returns the elements that are allowed in a valid address for the country.
+        /// </summary>
+        
+        public IEnumerable<AddressField> GetAllowedFields() => Enum.GetValues( typeof(AddressField) )
+            .OfType<AddressField>()
+            .Where( field => field == AddressField.Country || Country?.Format?.Contains( $"%{(char)field}" ) == true )
+            .ToArray();
     }
 }

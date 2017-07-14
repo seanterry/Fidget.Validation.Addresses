@@ -123,6 +123,8 @@ namespace Fidget.Validation.Addresses.Validation
             {
                 address = new AddressData();
                 Mutators[field].Invoke( address, random() );
+                MockContext.Setup( _ => _.GetRequiredFields() ).Returns( new AddressField[] { field } );
+
                 var expected = new ValidationFailure( field, AddressFieldError.MissingRequiredField );
                 var actual = invoke();
 
