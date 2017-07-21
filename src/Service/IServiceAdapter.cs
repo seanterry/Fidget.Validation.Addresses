@@ -22,7 +22,7 @@ namespace Fidget.Validation.Addresses.Service
         /// <param name="country">Identifier of the country to return.</param>
         /// <param name="language">Language code for the metadata to return.</param>
 
-        Task<ICountryMetadata> GetCountry( IGlobalMetadata global, string country, string language );
+        Task<ICountryMetadata> GetCountry( string country, string language );
 
         /// <summary>
         /// Returns metadata for the specified province if it is available.

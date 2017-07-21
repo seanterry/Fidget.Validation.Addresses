@@ -72,7 +72,7 @@ namespace Fidget.Validation.Addresses
             {
                 var global = await GetGlobalAsync();
 
-                return await Adapter.GetCountry( global, countryKey, language );
+                return await Adapter.GetCountry( countryKey, language );
             }
             
             /// <summary>

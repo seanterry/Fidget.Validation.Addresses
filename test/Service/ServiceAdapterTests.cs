@@ -13,7 +13,6 @@ namespace Fidget.Validation.Addresses.Service
     {
         Mock<IServiceClient> MockClient = new Mock<IServiceClient>();
         IServiceClient client => MockClient?.Object;
-
         IServiceAdapter instance => new ServiceAdapter( client );
 
         public class Constructor : ServiceAdapterTests
@@ -43,9 +42,6 @@ namespace Fidget.Validation.Addresses.Service
 
         public class GetCountry : ServiceAdapterTests
         {
-            GlobalMetadata global = new GlobalMetadata { Id = "data" };
-            string country = "XX";
-            string language = Guid.NewGuid().ToString();
             CountryMetadata defaultCountry = new CountryMetadata
             {
                 Id = "data/ZZ",
@@ -58,87 +54,128 @@ namespace Fidget.Validation.Addresses.Service
                 PostalCodeType = "postal",
             };
 
-            async Task<ICountryMetadata> invoke() => await instance.GetCountry( global, country, language );
-
-            [Fact]
-            public async Task Requires_global()
+            public static IEnumerable<object[]> WhenCountryNotInGlobalCases()
             {
-                global = null;
-                await Assert.ThrowsAsync<ArgumentNullException>( nameof(global), invoke );
+                var languages = new string[] { null, "en" };
+                var countriesThatShouldNotMatch = new string[] { null, string.Empty, "XB" };
+
+                // collections of countries that should not match any country
+                var globalChildren = new IEnumerable<string>[]
+                {
+                    null,
+                    Enumerable.Empty<string>(),
+                    new string[] { Guid.NewGuid().ToString(), Guid.NewGuid().ToString() },
+                };
+
+                return
+                    from country in countriesThatShouldNotMatch
+                    from children in globalChildren
+                    from language in languages
+                    select new object[] 
+                    { 
+                        new GlobalMetadata { Countries = children },
+                        country,
+                        language,
+                    };
             }
 
-            public static IEnumerable<object[]> WhenCountryNotInGlobalKeysCases => new object[][]
-            {
-                new object[] { null },
-                new object[] { Enumerable.Empty<string>() },
-                new object[] { new string[] { "XB" } },
-            };
-
             [Theory]
-            [MemberData(nameof(WhenCountryNotInGlobalKeysCases))]
-            public async Task WhenCountryNotInGlobalKeys_returns_null( IEnumerable<string> countries )
+            [InlineData( null, "XW", null )]
+            [MemberData(nameof(WhenCountryNotInGlobalCases))]
+            public async Task WhenCountryNotInGlobal_returns_null( IGlobalMetadata global, string country, string language )
             {
-                global.Countries = countries;
-                var result = await invoke();
+                MockClient.Setup( _=> _.Query<GlobalMetadata>( "data" ) ).ReturnsAsync( global as GlobalMetadata );
+                var result = await instance.GetCountry( country, language );
                 Assert.Null( result );
             }
 
-            public static IEnumerable<object[]> WhenCountryInGlobalCases => new object[][]
+            public static IEnumerable<object[]> WhenCountryInGlobal()
             {
-                new object[] { new string[] { "XX", "XB" }, null },
-                new object[] { new string[] { "XX", "XB" }, new CountryMetadata { Id = "data/XX", Key = "XX" } },
+                var languages = new string[] { null, "en", };
+                var countries = new string[] { "XW", "xw", };
 
-                // also include scenario where the default value item requested
-                new object[] { new string[] { "XX", "XB" }, new CountryMetadata { Id = "data/XX", Key = "ZZ" } },
-            };
+                return
+                    from country in countries
+                    from language in languages
+                    select new object[]
+                    {
+                        new GlobalMetadata { Countries = new string[] { "XA", "XW", "XB" } },
+                        country,
+                        language,
+                        new CountryMetadata { Id = $"data/XW{( language != null ? $"--{language}" : null )}" },
+                    };
+            }
 
             [Theory]
-            [MemberData(nameof(WhenCountryInGlobalCases))]
-            public async Task WhenCountryInGlobal_returns_clientResult( IEnumerable<string> countries, ICountryMetadata expected )
+            [MemberData(nameof(WhenCountryInGlobal))]
+            public async Task WhenCountryInGlobal_returns_clientResult( IGlobalMetadata global, string country, string language, ICountryMetadata expected )
             {
-                global.Countries = countries;
-                var id = $"{expected?.Id}--{language}";
-                MockClient.Setup( _=> _.Query<CountryMetadata>( id ) ).ReturnsAsync( expected as CountryMetadata );
+                MockClient.Setup( _=> _.Query<GlobalMetadata>( "data" ) ).ReturnsAsync( global as GlobalMetadata );
+                MockClient.Setup( _=> _.Query<CountryMetadata>( defaultCountry.Id ) ).ReturnsAsync( defaultCountry );
+                MockClient.Setup( _=> _.Query<CountryMetadata>( expected.Id ) ).ReturnsAsync( expected as CountryMetadata );
 
-                var actual = await invoke();
+                var actual = await instance.GetCountry( country, language );
                 Assert.Equal( expected, actual );
             }
 
-            public static IEnumerable<object[]> GetFilledCountryValues => new object[][]
+            public static IEnumerable<object[]> WhenCountryInGlobalCases_Defaults()
             {
-                new object[] { "XX", new CountryMetadata { Id = "data/XX", Format = Guid.NewGuid().ToString() } },
-                new object[] { "XX", new CountryMetadata { Id = "data/XX", Required = new AddressField[] { AddressField.StreetAddress, AddressField.Locality, AddressField.Province } } },
-                new object[] { "XX", new CountryMetadata { Id = "data/XX", Uppercase = new AddressField[] { AddressField.Locality, AddressField.Sublocality } } },
-                new object[] { "XX", new CountryMetadata { Id = "data/XX", StateType = Guid.NewGuid().ToString() } },
-                new object[] { "XX", new CountryMetadata { Id = "data/XX", LocalityType = Guid.NewGuid().ToString() } },
-                new object[] { "XX", new CountryMetadata { Id = "data/XX", SublocalityType = Guid.NewGuid().ToString() } },
-                new object[] { "XX", new CountryMetadata { Id = "data/XX", PostalCodeType = Guid.NewGuid().ToString() } },
-                new object[] { "XX", new CountryMetadata { Id = "data/XX" } },
-            };
+                var languages = new string[] { null, "en", };
+                var countries = new string[] { "XW", "xw", };
+                var global = new GlobalMetadata { Countries = new string[] { "XA", "XW", "XB" } };
+                var results = new CountryMetadata[]
+                {
+                    new CountryMetadata { Format = Guid.NewGuid().ToString() },
+                    new CountryMetadata { Required = new AddressField[] { AddressField.StreetAddress, AddressField.Locality, AddressField.Province } },
+                    new CountryMetadata { Uppercase = new AddressField[] { AddressField.Locality, AddressField.Sublocality } },
+                    new CountryMetadata { StateType = Guid.NewGuid().ToString() },
+                    new CountryMetadata { LocalityType = Guid.NewGuid().ToString() },
+                    new CountryMetadata { SublocalityType = Guid.NewGuid().ToString() },
+                    new CountryMetadata { PostalCodeType = Guid.NewGuid().ToString() },
+                    new CountryMetadata { },
+                };
 
-            /// <summary>
-            /// Property values from the default country should be present on the result if those values are null from the service.
-            /// </summary>
+                return
+                    from result in results
+                    from country in countries
+                    from language in languages
+                    select new object[]
+                    {
+                        global,
+                        country,
+                        language,
+                        new CountryMetadata
+                        {
+                            Id = $"data/XW{( language != null ? $"--{language}" : null )}",
+                            Format = result.Format,
+                            Required = result.Required,
+                            Uppercase = result.Uppercase,
+                            StateType = result.StateType,
+                            LocalityType = result.LocalityType,
+                            SublocalityType = result.SublocalityType,
+                            PostalCodeType = result.PostalCodeType,
+                        },
+                    };
+            }
 
             [Theory]
-            [MemberData( nameof( GetFilledCountryValues ) )]
-            public async Task Returns_defaultValues_whenResultValuesNull( string countryKey, ICountryMetadata result )
+            [MemberData( nameof( WhenCountryInGlobalCases_Defaults ) )]
+            public async Task WhenCountryInGlobal_returns_clientResultWithDefaults( IGlobalMetadata global, string country, string language, ICountryMetadata expected )
             {
-                language = null;
-                country = countryKey;
-                global.Countries = new string[] { country };
-                MockClient.Setup( _ => _.Query<CountryMetadata>( defaultCountry.Id ) ).ReturnsAsync( defaultCountry ).Verifiable();
-                MockClient.Setup( _ => _.Query<CountryMetadata>( result.Id ) ).ReturnsAsync( (CountryMetadata)result ).Verifiable();
+                MockClient.Setup( _ => _.Query<GlobalMetadata>( "data" ) ).ReturnsAsync( global as GlobalMetadata );
+                MockClient.Setup( _ => _.Query<CountryMetadata>( defaultCountry.Id ) ).ReturnsAsync( defaultCountry );
+                MockClient.Setup( _ => _.Query<CountryMetadata>( expected.Id ) ).ReturnsAsync( expected as CountryMetadata );
 
-                var format = result.Format ?? defaultCountry.Format;
-                var required = result.Required ?? defaultCountry.Required;
-                var uppercase = result.Uppercase ?? defaultCountry.Uppercase;
-                var stateType = result.StateType ?? defaultCountry.StateType;
-                var localityType = result.LocalityType ?? defaultCountry.LocalityType;
-                var sublocalityType = result.SublocalityType ?? defaultCountry.SublocalityType;
-                var postalCodeType = result.PostalCodeType ?? defaultCountry.PostalCodeType;
+                var format = expected.Format ?? defaultCountry.Format;
+                var required = expected.Required ?? defaultCountry.Required;
+                var uppercase = expected.Uppercase ?? defaultCountry.Uppercase;
+                var stateType = expected.StateType ?? defaultCountry.StateType;
+                var localityType = expected.LocalityType ?? defaultCountry.LocalityType;
+                var sublocalityType = expected.SublocalityType ?? defaultCountry.SublocalityType;
+                var postalCodeType = expected.PostalCodeType ?? defaultCountry.PostalCodeType;
 
-                var actual = await invoke();
+                var actual = await instance.GetCountry( country, language );
+                Assert.Equal( expected, actual );
                 Assert.Equal( format, actual.Format );
                 Assert.Equal( required, actual.Required );
                 Assert.Equal( uppercase, actual.Uppercase );
@@ -146,8 +183,6 @@ namespace Fidget.Validation.Addresses.Service
                 Assert.Equal( localityType, actual.LocalityType );
                 Assert.Equal( sublocalityType, actual.SublocalityType );
                 Assert.Equal( postalCodeType, actual.PostalCodeType );
-
-                MockClient.VerifyAll();
             }
         }
 

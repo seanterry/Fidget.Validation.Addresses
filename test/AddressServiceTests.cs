@@ -72,10 +72,10 @@ namespace Fidget.Validation.Addresses
 
         public class GetCountryAsync : AddressServiceTests
         {
-            string countryKey;
+            string country;
             string language;
             
-            async Task<ICountryMetadata> invoke() => await instance.GetCountryAsync( countryKey, language );
+            async Task<ICountryMetadata> invoke() => await instance.GetCountryAsync( country, language );
 
             /// <summary>
             /// Country scenarios.
@@ -96,7 +96,7 @@ namespace Fidget.Validation.Addresses
             {
                 var global = new GlobalMetadata();
                 MockAdapter.Setup( _=> _.GetGlobal() ).ReturnsAsync( global ).Verifiable();
-                MockAdapter.Setup( _=> _.GetCountry( global, countryKey, language ) ).ReturnsAsync( expected ).Verifiable();
+                MockAdapter.Setup( _=> _.GetCountry( countryKey, language ) ).ReturnsAsync( expected ).Verifiable();
                 
                 var actual = await instance.GetCountryAsync( countryKey, language );
                 Assert.Equal( expected, actual );
@@ -137,7 +137,7 @@ namespace Fidget.Validation.Addresses
                 var countryValue = country?.Key;
                 var provinceValue = expected?.Key;
                 MockAdapter.Setup( _=> _.GetGlobal() ).ReturnsAsync( global );
-                MockAdapter.Setup( _=> _.GetCountry( global, countryValue, language ) ).ReturnsAsync( country );
+                MockAdapter.Setup( _=> _.GetCountry( countryValue, language ) ).ReturnsAsync( country );
                 MockAdapter.Setup( _=> _.GetProvince( country, provinceValue, language ) ).ReturnsAsync( expected );
 
                 var actual = await invoke( countryValue, provinceValue, language );

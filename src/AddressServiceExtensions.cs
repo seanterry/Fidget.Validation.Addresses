@@ -12,6 +12,34 @@ namespace Fidget.Validation.Addresses
     public static class AddressServiceExtensions
     {
         /// <summary>
+        /// Returns whether the given value is in the collection and outputs its index.
+        /// </summary>
+        /// <typeparam name="T">Type of the items in the collection.</typeparam>
+        /// <param name="source">Source collection to search.</param>
+        /// <param name="value">Value to locate in the collection.</param>
+        /// <param name="index">Index of the located item.</param>
+        /// <param name="comparer">Equality comparer.</param>
+        
+        internal static bool IndexOf<T>( this IEnumerable<T> source, T value, out int index, IEqualityComparer<T> comparer = null )
+        {
+            comparer = comparer ?? EqualityComparer<T>.Default;
+            index = 0;
+
+            if ( source != null )
+            {
+                foreach ( var item in source )
+                {
+                    if ( comparer.Equals( item, value ) ) return true;
+                    index++;
+                }
+            }
+
+            return false;
+        }
+
+        
+
+        /// <summary>
         /// Returns gobal metadata information.
         /// </summary>
         /// <param name="service">Address service.</param>
