@@ -13,15 +13,24 @@ namespace Fidget.Validation.Addresses
 {
     public class AddressServiceTests
     {
+        Mock<IServiceAdapter> MockAdapter = new Mock<IServiceAdapter>();
         Mock<IServiceClient> MockClient = new Mock<IServiceClient>();
         Mock<IValidationContextFactory> MockFactory = new Mock<IValidationContextFactory>();
+        IServiceAdapter adapter => MockAdapter?.Object;
         IServiceClient client => MockClient?.Object;
         IValidationContextFactory factory => MockFactory?.Object;
         
-        IAddressService instance => new AddressService.Implementation( client, factory );
+        IAddressService instance => new AddressService.Implementation( adapter, client, factory );
 
         public class Constructor : AddressServiceTests
         {
+            [Fact]
+            public void Requires_adapter()
+            {
+                MockAdapter = null;
+                Assert.Throws<ArgumentNullException>( nameof(adapter), ()=>instance );
+            }
+
             [Fact]
             public void Requires_client()
             {
@@ -53,11 +62,11 @@ namespace Fidget.Validation.Addresses
             [MemberData( nameof( GetGlobalResponses ) )]
             public async Task Returns_valueFromClient( IGlobalMetadata expected )
             {
-                MockClient.Setup( _ => _.Query<GlobalMetadata>( "data" ) ).ReturnsAsync( (GlobalMetadata)expected ).Verifiable();
+                MockAdapter.Setup( _ => _.GetGlobal() ).ReturnsAsync( (GlobalMetadata)expected ).Verifiable();
                 var actual = await instance.GetGlobalAsync();
 
                 Assert.Equal( expected, actual );
-                MockClient.VerifyAll();
+                MockAdapter.VerifyAll();
             }
         }
 
@@ -65,27 +74,8 @@ namespace Fidget.Validation.Addresses
         {
             string countryKey;
             string language;
-            CountryMetadata defaultCountry = new CountryMetadata
-            {
-                Id = "data/ZZ",
-                Format = "%N%n%O%n%A%n%C",
-                Required = new AddressField[] { AddressField.StreetAddress, AddressField.Locality },
-                Uppercase = new AddressField[] { AddressField.Locality },
-                StateType = "province",
-                LocalityType = "city",
-                SublocalityType = "suburb",
-                PostalCodeType = "postal",
-            };
-
+            
             async Task<ICountryMetadata> invoke() => await instance.GetCountryAsync( countryKey, language );
-
-            [Fact]
-            public async Task Requires_countryKey()
-            {
-                countryKey = null;
-                language = null;
-                await Assert.ThrowsAsync<ArgumentNullException>( nameof( countryKey ), invoke );
-            }
 
             /// <summary>
             /// Country scenarios.
@@ -93,109 +83,65 @@ namespace Fidget.Validation.Addresses
 
             public static IEnumerable<object[]> GetCountryValues => new object[][]
             {
-                new object[] { "XX", null, "data/XX", new CountryMetadata { Id = "data/XX" } },
-                new object[] { "XX", null, "data/XX", null },
-                new object[] { "XX", "abc", "data/XX--abc", new CountryMetadata { Id = "data/XX--abc" } },
-                new object[] { "XX", "abc", "data/XX--abc", null },
+                new object[] { null, null, null },
+                new object[] { "XX", null, new CountryMetadata { Id = "data/XX" } },
+                new object[] { "XX", null, null },
+                new object[] { "XX", "abc", new CountryMetadata { Id = "data/XX--abc" } },
+                new object[] { "XX", "abc", null },
             };
 
             [Theory]
             [MemberData( nameof( GetCountryValues ) )]
-            public async Task Returns_valueFromServiceClient( string countryKey, string language, string id, ICountryMetadata expected )
+            public async Task Returns_valueFromServiceAdapter( string countryKey, string language, ICountryMetadata expected )
             {
-                MockClient.Setup( _ => _.Query<CountryMetadata>( defaultCountry.Id ) ).ReturnsAsync( defaultCountry ).Verifiable();
-                MockClient.Setup( _ => _.Query<CountryMetadata>( id ) ).ReturnsAsync( (CountryMetadata)expected ).Verifiable();
+                var global = new GlobalMetadata();
+                MockAdapter.Setup( _=> _.GetGlobal() ).ReturnsAsync( global ).Verifiable();
+                MockAdapter.Setup( _=> _.GetCountry( global, countryKey, language ) ).ReturnsAsync( expected ).Verifiable();
                 
                 var actual = await instance.GetCountryAsync( countryKey, language );
                 Assert.Equal( expected, actual );
-                MockClient.VerifyAll();
-            }
-
-            public static IEnumerable<object[]> GetFilledCountryValues => new object[][]
-            {
-                new object[] { "XX", new CountryMetadata { Id = "data/XX", Format = Guid.NewGuid().ToString() } },
-                new object[] { "XX", new CountryMetadata { Id = "data/XX", Required = new AddressField[] { AddressField.StreetAddress, AddressField.Locality, AddressField.Province } } },
-                new object[] { "XX", new CountryMetadata { Id = "data/XX", Uppercase = new AddressField[] { AddressField.Locality, AddressField.Sublocality } } },
-                new object[] { "XX", new CountryMetadata { Id = "data/XX", StateType = Guid.NewGuid().ToString() } },
-                new object[] { "XX", new CountryMetadata { Id = "data/XX", LocalityType = Guid.NewGuid().ToString() } },
-                new object[] { "XX", new CountryMetadata { Id = "data/XX", SublocalityType = Guid.NewGuid().ToString() } },
-                new object[] { "XX", new CountryMetadata { Id = "data/XX", PostalCodeType = Guid.NewGuid().ToString() } },
-                new object[] { "XX", new CountryMetadata { Id = "data/XX" } },
-            };
-
-            /// <summary>
-            /// Property values from the default country should be present on the result if those values are null from the service.
-            /// </summary>
-
-            [Theory]
-            [MemberData( nameof( GetFilledCountryValues ) )]
-            public async Task Returns_defaultValues_whenResultValuesNull( string countryKey, ICountryMetadata country )
-            {
-                MockClient.Setup( _ => _.Query<CountryMetadata>( defaultCountry.Id ) ).ReturnsAsync( defaultCountry ).Verifiable();
-                MockClient.Setup( _ => _.Query<CountryMetadata>( country.Id ) ).ReturnsAsync( (CountryMetadata)country ).Verifiable();
-
-                var format = country.Format ?? defaultCountry.Format;
-                var required = country.Required ?? defaultCountry.Required;
-                var uppercase = country.Uppercase ?? defaultCountry.Uppercase;
-                var stateType = country.StateType ?? defaultCountry.StateType;
-                var localityType = country.LocalityType ?? defaultCountry.LocalityType;
-                var sublocalityType = country.SublocalityType ?? defaultCountry.SublocalityType;
-                var postalCodeType = country.PostalCodeType ?? defaultCountry.PostalCodeType;
-
-                var actual = await instance.GetCountryAsync( countryKey, language );
-                Assert.Equal( format, country.Format );
-                Assert.Equal( required, country.Required );
-                Assert.Equal( uppercase, country.Uppercase );
-                Assert.Equal( stateType, country.StateType );
-                Assert.Equal( localityType, country.LocalityType );
-                Assert.Equal( sublocalityType, country.SublocalityType );
-                Assert.Equal( postalCodeType, country.PostalCodeType );
-
-                MockClient.VerifyAll();
+                MockAdapter.VerifyAll();
             }
         }
 
         public class GetProvinceAsync : AddressServiceTests
         {
-            string countryKey = Guid.NewGuid().ToString();
-            string provinceKey = Guid.NewGuid().ToString();
-            string language = Guid.NewGuid().ToString();
-            async Task<IProvinceMetadata> invoke() => await instance.GetProvinceAsync( countryKey, provinceKey, language );
+            async Task<IProvinceMetadata> invoke( string country, string province, string language ) => await instance.GetProvinceAsync( country, province, language );
 
-            [Fact]
-            public async Task Requires_countryKey()
+            public static IEnumerable<object[]> GetArguments()
             {
-                countryKey = null;
-                await Assert.ThrowsAsync<ArgumentNullException>( nameof( countryKey ), invoke );
+                var global = new GlobalMetadata();
+                var languages = new string[] { null, "en" };
+                var countries = new CountryMetadata[]
+                {
+                    null,
+                    new CountryMetadata { Key = "XX" },
+                };
+                var provinces = new ProvinceMetadata[]
+                {
+                    null,
+                    new ProvinceMetadata { Key = "XY" },
+                };
+
+                return
+                    from country in countries
+                    from expected in provinces
+                    from language in languages
+                    select new object[] { global, country, expected, language };
             }
-
-            [Fact]
-            public async Task Requires_provinceKey()
-            {
-                provinceKey = null;
-                await Assert.ThrowsAsync<ArgumentNullException>( nameof( provinceKey ), invoke );
-            }
-
-            public static IEnumerable<object[]> GetArguments() => new object[][]
-            {
-                new object[] { "XX", "ZZ", null, "data/XX/ZZ", null },
-                new object[] { "XX", "ZZ", null, "data/XX/ZZ", new ProvinceMetadata { Id = "data/XX/ZZ" } },
-                new object[] { "XX", "ZZ", "xyz", "data/XX/ZZ--xyz", null },
-                new object[] { "XX", "ZZ", "xyz", "data/XX/ZZ--xyz", new ProvinceMetadata { Id = "data/XX/ZZ--xyz" } },
-            };
-
+            
             [Theory]
             [MemberData( nameof( GetArguments ) )]
-            public async Task Returns_clientResult( string countryKey, string provinceKey, string language, string id, IProvinceMetadata expected )
+            public async Task Returns_clientResult( IGlobalMetadata global, ICountryMetadata country, IProvinceMetadata expected, string language )
             {
-                this.countryKey = countryKey;
-                this.provinceKey = provinceKey;
-                this.language = language;
-                MockClient.Setup( _ => _.Query<ProvinceMetadata>( id ) ).ReturnsAsync( (ProvinceMetadata)expected ).Verifiable();
+                var countryValue = country?.Key;
+                var provinceValue = expected?.Key;
+                MockAdapter.Setup( _=> _.GetGlobal() ).ReturnsAsync( global );
+                MockAdapter.Setup( _=> _.GetCountry( global, countryValue, language ) ).ReturnsAsync( country );
+                MockAdapter.Setup( _=> _.GetProvince( country, provinceValue, language ) ).ReturnsAsync( expected );
 
-                var actual = await invoke();
+                var actual = await invoke( countryValue, provinceValue, language );
                 Assert.Equal( expected, actual );
-                MockClient.VerifyAll();
             }
         }
 

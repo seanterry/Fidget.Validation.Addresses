@@ -49,16 +49,9 @@ namespace Fidget.Validation.Addresses
                 Assert.Throws<ArgumentNullException>( nameof( service ), () => invoke() );
             }
 
-            [Fact]
-            public void Requires_countryKey()
-            {
-                countryKey = null;
-                Assert.Throws<ArgumentNullException>( nameof(countryKey), ()=>invoke() );
-            }
-
             [Theory]
             [MemberData(nameof(AddressServiceTests.GetCountryAsync.GetCountryValues),MemberType =typeof(AddressServiceTests.GetCountryAsync))]
-            public void Returns_serviceResult( string countryKey, string language, string ignored, ICountryMetadata expected )
+            public void Returns_serviceResult( string countryKey, string language, ICountryMetadata expected )
             {
                 MockService.Setup( _=> _.GetCountryAsync( countryKey, language ) ).ReturnsAsync( expected );
 
@@ -69,11 +62,11 @@ namespace Fidget.Validation.Addresses
 
         public class GetProvince : AddressServiceExtensionsTests
         {
-            string countryKey = Guid.NewGuid().ToString();
-            string provinceKey = Guid.NewGuid().ToString();
+            string country = Guid.NewGuid().ToString();
+            string province = Guid.NewGuid().ToString();
             string language = Guid.NewGuid().ToString();
 
-            IProvinceMetadata invoke() => service.GetProvince( countryKey, provinceKey, language );
+            IProvinceMetadata invoke() => service.GetProvince( country, province, language );
 
             [Fact]
             public void Requires_service()
@@ -82,30 +75,22 @@ namespace Fidget.Validation.Addresses
                 Assert.Throws<ArgumentNullException>( nameof( service ), () => invoke() );
             }
 
-            [Fact]
-            public void Requires_countryKey()
+            public static IEnumerable<object[]> GetArguments => new object[][]
             {
-                countryKey = null;
-                Assert.Throws<ArgumentNullException>( nameof( countryKey ), () => invoke() );
-            }
-
-            [Fact]
-            public void Requires_provinceKey()
-            {
-                provinceKey = null;
-                Assert.Throws<ArgumentNullException>( nameof( provinceKey ), () => invoke() );
-            }
+                new object[] { null, null, null, null },
+                new object[] { "XW", "XX", "en", new ProvinceMetadata() },
+            };
 
             [Theory]
-            [MemberData(nameof(AddressServiceTests.GetProvinceAsync.GetArguments),MemberType =typeof(AddressServiceTests.GetProvinceAsync))]
-            public void Returns_serviceResult( string countryKey, string provinceKey, string language, string ignored, IProvinceMetadata expected  )
+            [MemberData(nameof(GetArguments))]
+            public void Returns_serviceResult( string country, string province, string language, IProvinceMetadata expected )
             {
-                this.countryKey = countryKey;
-                this.provinceKey = provinceKey;
+                this.country = country;
+                this.province = province;
                 this.language = language;
-                MockService.Setup( _=> _.GetProvinceAsync( countryKey, provinceKey, language ) ).ReturnsAsync( expected );
+                MockService.Setup( _=> _.GetProvinceAsync( country, province, language ) ).ReturnsAsync( expected );
 
-                var actual = invoke();
+                var actual = service.GetProvince( country, province, language );
                 Assert.Equal( expected, actual );
             }
         }

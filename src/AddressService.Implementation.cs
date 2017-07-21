@@ -18,6 +18,12 @@ namespace Fidget.Validation.Addresses
         internal class Implementation : IAddressService
         {
             /// <summary>
+            /// Adapter that backs the service.
+            /// </summary>
+            
+            readonly IServiceAdapter Adapter;
+
+            /// <summary>
             /// Service client.
             /// </summary>
             
@@ -35,8 +41,9 @@ namespace Fidget.Validation.Addresses
             /// <param name="client">Service client.</param>
             /// <param name="validators">Collection of address validators.</param>
             
-            public Implementation( IServiceClient client, IValidationContextFactory factory )
+            public Implementation( IServiceAdapter adapter, IServiceClient client, IValidationContextFactory factory )
             {
+                Adapter = adapter ?? throw new ArgumentNullException( nameof(adapter) );
                 Client = client ?? throw new ArgumentNullException( nameof(client) );
                 Factory = factory ?? throw new ArgumentNullException( nameof(factory) );
             }
@@ -53,7 +60,7 @@ namespace Fidget.Validation.Addresses
             /// Returns gobal metadata information.
             /// </summary>
 
-            public async Task<IGlobalMetadata> GetGlobalAsync() => await Client.Query<GlobalMetadata>( "data" );
+            public async Task<IGlobalMetadata> GetGlobalAsync() => await Adapter.GetGlobal();
 
             /// <summary>
             /// Returns metadata for the specified country if it is available.
@@ -63,41 +70,23 @@ namespace Fidget.Validation.Addresses
 
             public async Task<ICountryMetadata> GetCountryAsync( string countryKey, string language )
             {
-                if ( countryKey == null ) throw new ArgumentNullException( nameof( countryKey ) );
+                var global = await GetGlobalAsync();
 
-                var id = BuildIdentifier( language, countryKey );
-                var defaults = await Client.Query<CountryMetadata>( "data/ZZ" );
-                var result = await Client.Query<CountryMetadata>( id );
-
-                if ( result != null && defaults != null )
-                {
-                    result.Format = result.Format ?? defaults.Format;
-                    result.Required = result.Required ?? defaults.Required;
-                    result.Uppercase = result.Uppercase ?? defaults.Uppercase;
-                    result.StateType = result.StateType ?? defaults.StateType;
-                    result.LocalityType = result.LocalityType ?? defaults.LocalityType;
-                    result.SublocalityType = result.SublocalityType ?? defaults.SublocalityType;
-                    result.PostalCodeType = result.PostalCodeType ?? defaults.PostalCodeType;
-                }
-
-                return result;
+                return await Adapter.GetCountry( global, countryKey, language );
             }
             
             /// <summary>
             /// Returns metadata for the specified province if it is available.
             /// </summary>
             /// <param name="countryKey">Key of the parent country.</param>
-            /// <param name="provinceKey">Key of the province to return.</param>
+            /// <param name="province">Key or name of the province to return.</param>
             /// <param name="language">Language code for the metadata to return.</param>
 
-            public async Task<IProvinceMetadata> GetProvinceAsync( string countryKey, string provinceKey, string language )
+            public async Task<IProvinceMetadata> GetProvinceAsync( string countryKey, string province, string language )
             {
-                if ( countryKey == null ) throw new ArgumentNullException( nameof( countryKey ) );
-                if ( provinceKey == null ) throw new ArgumentNullException( nameof( provinceKey ) );
-
-                var id = BuildIdentifier( language, countryKey, provinceKey );
-
-                return await Client.Query<ProvinceMetadata>( id );
+                var country = await GetCountryAsync( countryKey, language );
+                
+                return await Adapter.GetProvince( country, province, language );
             }
 
             /// <summary>

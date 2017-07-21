@@ -3,8 +3,6 @@ using Fidget.Validation.Addresses.Service.Decorators;
 using Fidget.Validation.Addresses.Validation;
 using Microsoft.Extensions.Caching.Memory;
 using StructureMap;
-using System.Collections;
-using System.Collections.Generic;
 
 namespace Fidget.Validation.Addresses
 {
@@ -27,7 +25,8 @@ namespace Fidget.Validation.Addresses
                 config.For<IServiceClient>().DecorateAllWith<CachingDecorator>().Singleton();
                 config.For<IServiceClient>().DecorateAllWith<NullifyingDecorator>().Singleton();
                 config.For<IServiceClient>().DecorateAllWith<CopyingDecorator>().Singleton();
-                
+                config.For<IServiceAdapter>().Use<ServiceAdapter>().Singleton();
+
                 config.For<IAddressValidator>().Use<RequiredElementsValidator>().Singleton();
                 config.For<IAddressValidator>().Use<AllowedElementsValidator>().Singleton();
                 config.For<IValidationContextFactory>().Use<ValidationContext.Factory>().Singleton();

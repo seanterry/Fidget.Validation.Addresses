@@ -38,8 +38,7 @@ namespace Fidget.Validation.Addresses
         public static ICountryMetadata GetCountry( this IAddressService service, string countryKey, string language = null )
         {
             if ( service == null ) throw new ArgumentNullException( nameof( service ) );
-            if ( countryKey == null ) throw new ArgumentNullException( nameof( countryKey ) );
-
+            
             return service
                 .GetCountryAsync( countryKey, language )
                 .Result;
@@ -50,20 +49,18 @@ namespace Fidget.Validation.Addresses
         /// </summary>
         /// <param name="service">Address service.</param>
         /// <param name="countryKey">Key of the parent country.</param>
-        /// <param name="provinceKey">Key of the province to return.</param>
+        /// <param name="province">Key or name of the province to return.</param>
         /// <param name="language">
         /// (Optional) Language code for the metadata to return.
         /// If metadata is not available for the language, no result will be returned.
         /// </param>
 
-        public static IProvinceMetadata GetProvince( this IAddressService service, string countryKey, string provinceKey, string language = null )
+        public static IProvinceMetadata GetProvince( this IAddressService service, string countryKey, string province, string language = null )
         {
             if ( service == null ) throw new ArgumentNullException( nameof( service ) );
-            if ( countryKey == null ) throw new ArgumentNullException( nameof( countryKey ) );
-            if ( provinceKey == null ) throw new ArgumentNullException( nameof( provinceKey ) );
-
+            
             return service
-                .GetProvinceAsync( countryKey, provinceKey, language )
+                .GetProvinceAsync( countryKey, province, language )
                 .Result;
         }
 
