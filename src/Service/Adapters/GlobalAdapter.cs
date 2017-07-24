@@ -4,7 +4,7 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Fidget.Validation.Addresses.Service
+namespace Fidget.Validation.Addresses.Service.Adapters
 {
     /// <summary>
     /// Adapter for interacting with global metadata.

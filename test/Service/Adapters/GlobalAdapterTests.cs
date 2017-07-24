@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Xunit;
 
-namespace Fidget.Validation.Addresses.Service
+namespace Fidget.Validation.Addresses.Service.Adapters
 {
     public class GlobalAdapterTests
     {

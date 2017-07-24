@@ -1,7 +1,7 @@
 ﻿using Fidget.Validation.Addresses.Service.Metadata;
 using System.Threading.Tasks;
 
-namespace Fidget.Validation.Addresses.Service
+namespace Fidget.Validation.Addresses.Service.Adapters
 {
     /// <summary>
     /// Defines an adapter for interacting with global metadata.
