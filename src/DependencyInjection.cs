@@ -1,4 +1,5 @@
-﻿using Fidget.Validation.Addresses.Client;
+﻿using Fidget.Validation.Addresses.Adapters;
+using Fidget.Validation.Addresses.Client;
 using Fidget.Validation.Addresses.Client.Decorators;
 using Fidget.Validation.Addresses.Service;
 using Fidget.Validation.Addresses.Validation;
@@ -26,6 +27,8 @@ namespace Fidget.Validation.Addresses
                 config.For<IServiceClient>().DecorateAllWith<CachingDecorator>();
                 config.For<IServiceClient>().DecorateAllWith<NullifyingDecorator>();
                 config.For<IServiceClient>().DecorateAllWith<CopyingDecorator>();
+
+                config.For<IGlobalAdapter>().Use<GlobalAdapter>();
 
                 config.For<IServiceAdapter>().Use<ServiceAdapter>().Singleton();
 
