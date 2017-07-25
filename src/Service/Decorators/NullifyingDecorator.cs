@@ -1,4 +1,4 @@
-﻿using Fidget.Validation.Addresses.Service.Metadata;
+﻿using Fidget.Validation.Addresses.Metadata;
 using System;
 using System.Threading.Tasks;
 
@@ -32,7 +32,7 @@ namespace Fidget.Validation.Addresses.Service.Decorators
         /// <typeparam name="T">Type of the metadata response.</typeparam>
         /// <param name="id">Data record to return.</param>
 
-        public async Task<T> Query<T>( string id ) where T : ICommonMetadata
+        public async Task<T> Query<T>( string id ) where T : CommonMetadata
         {
             if ( id == null ) throw new ArgumentNullException( nameof( id ) );
 

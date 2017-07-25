@@ -1,5 +1,4 @@
-﻿using Fidget.Validation.Addresses.Service.Metadata;
-using Fidget.Validation.Addresses.Service.Metadata.Internal;
+﻿using Fidget.Validation.Addresses.Metadata;
 using System;
 using System.Threading.Tasks;
 
@@ -36,7 +35,7 @@ namespace Fidget.Validation.Addresses.Service.Adapters
         /// <param name="language">Language for the metadata.</param>
         /// <returns>The specified province, if found; otherwise null.</returns>
 
-        public async Task<IProvinceMetadata> Query( string country, string province, string language )
+        public async Task<ProvinceMetadata> Query( string country, string province, string language )
         {
             var countryMeta = await Country.Query( country, language );
 
@@ -56,7 +55,7 @@ namespace Fidget.Validation.Addresses.Service.Adapters
         /// <param name="locality">Key or name of the locality (case insinsitive).</param>
         /// <param name="key">Key of the locality, if found.</param>
         
-        public bool TryGetLocalityKey( IProvinceMetadata province, string locality, out string key ) =>
+        public bool TryGetLocalityKey( ProvinceMetadata province, string locality, out string key ) =>
             TryGetChildKey( province, locality, out key );
     }
 }

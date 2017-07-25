@@ -1,5 +1,4 @@
-﻿using Fidget.Validation.Addresses.Service.Metadata;
-using Fidget.Validation.Addresses.Service.Metadata.Internal;
+﻿using Fidget.Validation.Addresses.Metadata;
 using Moq;
 using System;
 using System.Collections.Generic;
@@ -53,7 +52,7 @@ namespace Fidget.Validation.Addresses.Service.Adapters
 
             [Theory]
             [MemberData( nameof( QueryUnmatchedTestCases ) )]
-            public async Task WhenNotMatched_returns_null( string country, string province, string language, ICountryMetadata countryMeta )
+            public async Task WhenNotMatched_returns_null( string country, string province, string language, CountryMetadata countryMeta )
             {
                 string key = null;
                 MockCountry.Setup( _ => _.Query( country, language ) ).ReturnsAsync( countryMeta as CountryMetadata );
@@ -81,10 +80,10 @@ namespace Fidget.Validation.Addresses.Service.Adapters
 
             [Theory]
             [MemberData( nameof( QueryMatchedCases ) )]
-            public async Task WhenMatched_returns_result( string country, string province, string language, IProvinceMetadata result )
+            public async Task WhenMatched_returns_result( string country, string province, string language, ProvinceMetadata result )
             {
                 // expected identifier
-                string key = "XX";
+                var key = "XX";
                 var id = $"data/XW/{key}{(language != null ? $"--{language}" : string.Empty)}";
                 var countryMeta = new CountryMetadata { Id = "data/XW" };
 
@@ -115,7 +114,7 @@ namespace Fidget.Validation.Addresses.Service.Adapters
 
             [Theory]
             [MemberData( nameof( NotMatchedCases ) )]
-            public void WhenNotMatched_returns_false( IProvinceMetadata provinceMeta )
+            public void WhenNotMatched_returns_false( ProvinceMetadata provinceMeta )
             {
                 var actual = instance.TryGetLocalityKey( provinceMeta, "XY", out string key );
                 Assert.False( actual );
@@ -201,7 +200,7 @@ namespace Fidget.Validation.Addresses.Service.Adapters
             [MemberData( nameof( FoundByKeyCases ) )]
             [MemberData( nameof( FoundByNameCases ) )]
             [MemberData( nameof( FoundByLatinNameCases ) )]
-            public void WhenMatched_returns_true_and_outputs_key( IProvinceMetadata meta, string value, string expected )
+            public void WhenMatched_returns_true_and_outputs_key( ProvinceMetadata meta, string value, string expected )
             {
                 var found = instance.TryGetLocalityKey( meta, value, out string key );
                 Assert.True( found );

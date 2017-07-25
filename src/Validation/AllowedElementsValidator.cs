@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
-using Fidget.Validation.Addresses.Service.Metadata;
 using System.Linq;
 
 namespace Fidget.Validation.Addresses.Validation
@@ -9,7 +7,7 @@ namespace Fidget.Validation.Addresses.Validation
     /// <summary>
     /// Validates elements that are allowed in an address.
     /// </summary>
-    
+
     class AllowedElementsValidator : IAddressValidator
     {
         /// <summary>

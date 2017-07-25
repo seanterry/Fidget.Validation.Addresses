@@ -1,4 +1,4 @@
-﻿using Fidget.Validation.Addresses.Service.Metadata;
+﻿using Fidget.Validation.Addresses.Metadata;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,31 +15,31 @@ namespace Fidget.Validation.Addresses.Validation
         /// Global metadata.
         /// </summary>
         
-        internal readonly IGlobalMetadata Global;
+        internal readonly GlobalMetadata Global;
 
         /// <summary>
         /// Country metadata.
         /// </summary>
         
-        internal readonly ICountryMetadata Country;
+        internal readonly CountryMetadata Country;
 
         /// <summary>
         /// Province metadata.
         /// </summary>
         
-        internal readonly IProvinceMetadata Province;
+        internal readonly ProvinceMetadata Province;
 
         /// <summary>
         /// Locality metadata.
         /// </summary>
         
-        internal readonly ILocalityMetadata Locality;
+        internal readonly LocalityMetadata Locality;
 
         /// <summary>
         /// Gets the sublocality metadata.
         /// </summary>
         
-        internal readonly ISublocalityMetadata Sublocality;
+        internal readonly SublocalityMetadata Sublocality;
 
         /// <summary>
         /// Constructs a context for address validation.
@@ -50,7 +50,7 @@ namespace Fidget.Validation.Addresses.Validation
         /// <param name="locality">Locality metadata.</param>
         /// <param name="sublocality">Sublocality metadata.</param>
         
-        public ValidationContext( IGlobalMetadata global, ICountryMetadata country, IProvinceMetadata province, ILocalityMetadata locality, ISublocalityMetadata sublocality )
+        public ValidationContext( GlobalMetadata global, CountryMetadata country, ProvinceMetadata province, LocalityMetadata locality, SublocalityMetadata sublocality )
         {
             Global = global ?? throw new ArgumentNullException( nameof(global) );
             Country = country;

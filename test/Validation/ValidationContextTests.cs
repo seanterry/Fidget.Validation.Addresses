@@ -1,5 +1,4 @@
-﻿using Fidget.Validation.Addresses.Service.Metadata;
-using Fidget.Validation.Addresses.Service.Metadata.Internal;
+﻿using Fidget.Validation.Addresses.Metadata;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,11 +10,11 @@ namespace Fidget.Validation.Addresses.Validation
 {
     public class ValidationContextTests
     {
-        IGlobalMetadata global = new GlobalMetadata();
+        GlobalMetadata global = new GlobalMetadata();
         CountryMetadata country = new CountryMetadata();
-        IProvinceMetadata province = new ProvinceMetadata();
-        ILocalityMetadata locality = new LocalityMetadata();
-        ISublocalityMetadata sublocality = new SublocalityMetadata();
+        ProvinceMetadata province = new ProvinceMetadata();
+        LocalityMetadata locality = new LocalityMetadata();
+        SublocalityMetadata sublocality = new SublocalityMetadata();
 
         IValidationContext instance => new ValidationContext( global, country, province, locality, sublocality );
 
@@ -117,7 +116,7 @@ namespace Fidget.Validation.Addresses.Validation
                 foreach ( var field in RequireableFields )
                 {
                     // returns whether the field is required by any of the given regions
-                    bool isRequired( params IRegionalMetadata[] regions ) => regions.Any( _ => _?.Required?.Contains( field ) == true );
+                    bool isRequired( params RegionalMetadata[] regions ) => regions.Any( _ => _?.Required?.Contains( field ) == true );
                     bool criteria( ValidationContext context ) => isRequired( context.Country, context.Province, context.Locality, context.Sublocality );
 
                     var contexts = getTestCases( field, criteria );
@@ -145,7 +144,7 @@ namespace Fidget.Validation.Addresses.Validation
                 foreach ( var field in RequireableFields )
                 {
                     // returns whether the field is required by any of the given regions
-                    bool isRequired( params IRegionalMetadata[] regions ) => regions.Any( _ => _?.Required?.Contains( field ) == true );
+                    bool isRequired( params RegionalMetadata[] regions ) => regions.Any( _ => _?.Required?.Contains( field ) == true );
                     bool criteria( ValidationContext context ) => !isRequired( context.Country, context.Province, context.Locality, context.Sublocality );
 
                     var contexts = getTestCases( field, criteria );

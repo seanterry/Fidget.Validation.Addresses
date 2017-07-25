@@ -2,13 +2,13 @@
 using Newtonsoft.Json;
 using System.Collections.Generic;
 
-namespace Fidget.Validation.Addresses.Service.Metadata.Internal
+namespace Fidget.Validation.Addresses.Metadata
 {
     /// <summary>
     /// Country-level metadata.
     /// </summary>
 
-    class CountryMetadata : RegionalMetadata, ICountryMetadata
+    public class CountryMetadata : RegionalMetadata
     {
         /// <summary>
         /// Gets the collection of languages for which regional data is available (if known).
@@ -21,7 +21,7 @@ namespace Fidget.Validation.Addresses.Service.Metadata.Internal
 
         [JsonProperty("languages")]
         [JsonConverter(typeof(TildeDelimitedStringConverter))]
-        public IEnumerable<string> Languages { get; set; }
+        public IEnumerable<string> Languages { get; internal set; }
 
         /// <summary>
         /// Gets a string that represents the address format in the country.
@@ -39,7 +39,7 @@ namespace Fidget.Validation.Addresses.Service.Metadata.Internal
         /// </remarks>
 
         [JsonProperty("fmt")]
-        public string Format { get; set; }
+        public string Format { get; internal set; }
 
         /// <summary>
         /// Get an alternate value of <see cref="Format"/> to use when formatting an address in a latin script.
@@ -51,7 +51,7 @@ namespace Fidget.Validation.Addresses.Service.Metadata.Internal
         /// </remarks>
 
         [JsonProperty("lfmt")]
-        public string LatinFormat { get; set; }
+        public string LatinFormat { get; internal set; }
 
         /// <summary>
         /// Gets the address elements that should be uppercased for valid addresses in the country.
@@ -59,7 +59,7 @@ namespace Fidget.Validation.Addresses.Service.Metadata.Internal
         
         [JsonProperty("upper")]
         [JsonConverter(typeof(AddressFieldCollectionConverter))]
-        public IEnumerable<AddressField> Uppercase { get; set; }
+        public IEnumerable<AddressField> Uppercase { get; internal set; }
 
         /// <summary>
         /// Gets the name used to describe the state/province level region in the country.
@@ -70,7 +70,7 @@ namespace Fidget.Validation.Addresses.Service.Metadata.Internal
         /// </remarks>
 
         [JsonProperty("state_name_type")]
-        public string StateType { get; set; }
+        public string StateType { get; internal set; }
 
         /// <summary>
         /// Gets the name used to describe the city/locality level region in the country.
@@ -81,7 +81,7 @@ namespace Fidget.Validation.Addresses.Service.Metadata.Internal
         /// </remarks>
 
         [JsonProperty("locality_name_type")]
-        public string LocalityType { get; set; }
+        public string LocalityType { get; internal set; }
 
         /// <summary>
         /// Gets the name used to describe the sub-locality level region in the country.
@@ -92,7 +92,7 @@ namespace Fidget.Validation.Addresses.Service.Metadata.Internal
         /// </remarks>
 
         [JsonProperty("sublocality_name_type")]
-        public string SublocalityType { get; set; }
+        public string SublocalityType { get; internal set; }
 
         /// <summary>
         /// Gets the name used to describe the postal code in the country.
@@ -103,6 +103,6 @@ namespace Fidget.Validation.Addresses.Service.Metadata.Internal
         /// </remarks>
 
         [JsonProperty("zip_name_type")]
-        public string PostalCodeType { get; set; }
+        public string PostalCodeType { get; internal set; }
     }
 }

@@ -1,5 +1,4 @@
-﻿using Fidget.Validation.Addresses.Service.Metadata;
-using Fidget.Validation.Addresses.Service.Metadata.Internal;
+﻿using Fidget.Validation.Addresses.Metadata;
 using Fidget.Validation.Addresses.Validation;
 using Moq;
 using System;
@@ -15,7 +14,7 @@ namespace Fidget.Validation.Addresses
 
         public class GetGlobal : AddressServiceExtensionsTests
         {
-            IGlobalMetadata invoke() => service.GetGlobal();
+            GlobalMetadata invoke() => service.GetGlobal();
 
             [Fact]
             public void Requires_service()
@@ -27,7 +26,7 @@ namespace Fidget.Validation.Addresses
             [Fact]
             public void Returns_serviceResult()
             {
-                IGlobalMetadata expected = new GlobalMetadata();
+                GlobalMetadata expected = new GlobalMetadata();
                 MockService.Setup( _=> _.GetGlobalAsync() ).ReturnsAsync( expected );
 
                 var actual = invoke();
@@ -40,7 +39,7 @@ namespace Fidget.Validation.Addresses
             string countryKey = Guid.NewGuid().ToString();
             string language = Guid.NewGuid().ToString();
 
-            ICountryMetadata invoke() => service.GetCountry( countryKey, language );
+            CountryMetadata invoke() => service.GetCountry( countryKey, language );
 
             [Fact]
             public void Requires_service()
@@ -51,7 +50,7 @@ namespace Fidget.Validation.Addresses
 
             [Theory]
             [MemberData(nameof(AddressServiceTests.GetCountryAsync.GetCountryValues),MemberType =typeof(AddressServiceTests.GetCountryAsync))]
-            public void Returns_serviceResult( string countryKey, string language, ICountryMetadata expected )
+            public void Returns_serviceResult( string countryKey, string language, CountryMetadata expected )
             {
                 MockService.Setup( _=> _.GetCountryAsync( countryKey, language ) ).ReturnsAsync( expected );
 
@@ -66,7 +65,7 @@ namespace Fidget.Validation.Addresses
             string province = Guid.NewGuid().ToString();
             string language = Guid.NewGuid().ToString();
 
-            IProvinceMetadata invoke() => service.GetProvince( country, province, language );
+            ProvinceMetadata invoke() => service.GetProvince( country, province, language );
 
             [Fact]
             public void Requires_service()
@@ -83,7 +82,7 @@ namespace Fidget.Validation.Addresses
 
             [Theory]
             [MemberData(nameof(GetArguments))]
-            public void Returns_serviceResult( string country, string province, string language, IProvinceMetadata expected )
+            public void Returns_serviceResult( string country, string province, string language, ProvinceMetadata expected )
             {
                 this.country = country;
                 this.province = province;
@@ -102,7 +101,7 @@ namespace Fidget.Validation.Addresses
             string localityKey = Guid.NewGuid().ToString();
             string language = Guid.NewGuid().ToString();
 
-            ILocalityMetadata invoke() => service.GetLocality( countryKey, provinceKey, localityKey, language );
+            LocalityMetadata invoke() => service.GetLocality( countryKey, provinceKey, localityKey, language );
 
             [Fact]
             public void Requires_service()
@@ -134,7 +133,7 @@ namespace Fidget.Validation.Addresses
 
             [Theory]
             [MemberData(nameof(AddressServiceTests.GetLocalityAsync.GetArguments),MemberType =typeof(AddressServiceTests.GetLocalityAsync))]
-            public void Returns_serviceResult( string countryKey, string provinceKey, string localityKey, string language, string ignored, ILocalityMetadata expected  )
+            public void Returns_serviceResult( string countryKey, string provinceKey, string localityKey, string language, string ignored, LocalityMetadata expected  )
             {
                 this.countryKey = countryKey;
                 this.provinceKey = provinceKey;
@@ -155,7 +154,7 @@ namespace Fidget.Validation.Addresses
             string sublocalityKey = Guid.NewGuid().ToString();
             string language = Guid.NewGuid().ToString();
 
-            ISublocalityMetadata invoke() => service.GetSublocality( countryKey, provinceKey, localityKey, sublocalityKey, language );
+            SublocalityMetadata invoke() => service.GetSublocality( countryKey, provinceKey, localityKey, sublocalityKey, language );
 
             [Fact]
             public void Requires_service()
@@ -194,7 +193,7 @@ namespace Fidget.Validation.Addresses
 
             [Theory]
             [MemberData(nameof(AddressServiceTests.GetSublocalityAsync.GetArguments),MemberType =typeof(AddressServiceTests.GetSublocalityAsync))]
-            public void Returns_serviceResult( string countryKey, string provinceKey, string localityKey, string sublocalityKey, string language, string ignored, ISublocalityMetadata expected  )
+            public void Returns_serviceResult( string countryKey, string provinceKey, string localityKey, string sublocalityKey, string language, string ignored, SublocalityMetadata expected  )
             {
                 this.countryKey = countryKey;
                 this.provinceKey = provinceKey;

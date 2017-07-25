@@ -1,4 +1,4 @@
-﻿using Fidget.Validation.Addresses.Service.Metadata;
+﻿using Fidget.Validation.Addresses.Metadata;
 using System.Threading.Tasks;
 
 namespace Fidget.Validation.Addresses.Service.Adapters
@@ -19,7 +19,7 @@ namespace Fidget.Validation.Addresses.Service.Adapters
         /// </param>
         /// <returns>The specified country, if found; otherwise null.</returns>
 
-        Task<ICountryMetadata> Query( string country, string language );
+        Task<CountryMetadata> Query( string country, string language );
 
         /// <summary>
         /// Returns whether the given province value can be located in the country metadata.
@@ -28,6 +28,6 @@ namespace Fidget.Validation.Addresses.Service.Adapters
         /// <param name="province">Key or name of the province (case insinsitive).</param>
         /// <param name="key">Key of the province, if found.</param>
 
-        bool TryGetProvinceKey( ICountryMetadata country, string province, out string key );
+        bool TryGetProvinceKey( CountryMetadata country, string province, out string key );
     }
 }

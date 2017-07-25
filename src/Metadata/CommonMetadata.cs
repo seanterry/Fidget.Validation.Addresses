@@ -1,10 +1,12 @@
-﻿namespace Fidget.Validation.Addresses.Service.Metadata
+﻿using Newtonsoft.Json;
+
+namespace Fidget.Validation.Addresses.Metadata
 {
     /// <summary>
     /// Defines the common elements of all address metadata.
     /// </summary>
     
-    public interface ICommonMetadata
+    public abstract class CommonMetadata
     {
         /// <summary>
         /// Gets a value that uniquely identifies the data record to the remote service.
@@ -14,6 +16,7 @@
         /// This is represented in the form of a path from parent IDs to the key.
         /// </remarks>
 
-        string Id { get; set; }
+        [JsonProperty("id")]
+        public string Id { get; internal set; }
     }
 }

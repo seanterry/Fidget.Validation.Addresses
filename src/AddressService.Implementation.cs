@@ -1,6 +1,5 @@
 ﻿using Fidget.Validation.Addresses.Service;
-using Fidget.Validation.Addresses.Service.Metadata;
-using Fidget.Validation.Addresses.Service.Metadata.Internal;
+using Fidget.Validation.Addresses.Metadata;
 using Fidget.Validation.Addresses.Validation;
 using System;
 using System.Collections.Generic;
@@ -60,7 +59,7 @@ namespace Fidget.Validation.Addresses
             /// Returns gobal metadata information.
             /// </summary>
 
-            public async Task<IGlobalMetadata> GetGlobalAsync() => await Adapter.GetGlobal();
+            public async Task<GlobalMetadata> GetGlobalAsync() => await Adapter.GetGlobal();
 
             /// <summary>
             /// Returns metadata for the specified country if it is available.
@@ -68,7 +67,7 @@ namespace Fidget.Validation.Addresses
             /// <param name="countryKey">Key of the country to return.</param>
             /// <param name="language">Language code for the metadata to return.</param>
 
-            public async Task<ICountryMetadata> GetCountryAsync( string countryKey, string language )
+            public async Task<CountryMetadata> GetCountryAsync( string countryKey, string language )
             {
                 var global = await GetGlobalAsync();
 
@@ -82,7 +81,7 @@ namespace Fidget.Validation.Addresses
             /// <param name="province">Key or name of the province to return.</param>
             /// <param name="language">Language code for the metadata to return.</param>
 
-            public async Task<IProvinceMetadata> GetProvinceAsync( string countryKey, string province, string language )
+            public async Task<ProvinceMetadata> GetProvinceAsync( string countryKey, string province, string language )
             {
                 var country = await GetCountryAsync( countryKey, language );
                 
@@ -97,7 +96,7 @@ namespace Fidget.Validation.Addresses
             /// <param name="localityKey">Key of the locality to return.</param>
             /// <param name="language">Language code for the metadata to return.</param>
 
-            public async Task<ILocalityMetadata> GetLocalityAsync( string countryKey, string provinceKey, string localityKey, string language )
+            public async Task<LocalityMetadata> GetLocalityAsync( string countryKey, string provinceKey, string localityKey, string language )
             {
                 if ( countryKey == null ) throw new ArgumentNullException( nameof( countryKey ) );
                 if ( provinceKey == null ) throw new ArgumentNullException( nameof( provinceKey ) );
@@ -117,7 +116,7 @@ namespace Fidget.Validation.Addresses
             /// <param name="sublocalityKey">Key of the sublocality to return.</param>
             /// <param name="language">Language code for the metadata to return.</param>
 
-            public async Task<ISublocalityMetadata> GetSublocalityAsync( string countryKey, string provinceKey, string localityKey, string sublocalityKey, string language )
+            public async Task<SublocalityMetadata> GetSublocalityAsync( string countryKey, string provinceKey, string localityKey, string sublocalityKey, string language )
             {
                 if ( countryKey == null ) throw new ArgumentNullException( nameof( countryKey ) );
                 if ( provinceKey == null ) throw new ArgumentNullException( nameof( provinceKey ) );
@@ -136,7 +135,7 @@ namespace Fidget.Validation.Addresses
             /// <param name="value">Country identifier.</param>
             /// <param name="countryKey">Key of the country, if found.</param>
             
-            public bool TryGetCountryKey( IGlobalMetadata global, string value, out string countryKey )
+            public bool TryGetCountryKey( GlobalMetadata global, string value, out string countryKey )
             {
                 countryKey = global?.Countries?.Contains( value ) == true
                     ? value
@@ -152,7 +151,7 @@ namespace Fidget.Validation.Addresses
             /// <param name="value">Key, name, or latin name of the child region.</param>
             /// <param name="key">Key of the child region, if found.</param>
             
-            public bool TryGetChildKey( IHierarchicalMetadata parent, string value, out string key )
+            public bool TryGetChildKey( RegionalMetadata parent, string value, out string key )
             {
                 int? getKeyIndex( params IEnumerable<string>[] collections )
                 {

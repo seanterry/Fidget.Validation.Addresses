@@ -1,4 +1,4 @@
-﻿using Fidget.Validation.Addresses.Service.Metadata;
+﻿using Fidget.Validation.Addresses.Metadata;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -51,7 +51,7 @@ namespace Fidget.Validation.Addresses.Service.Adapters
         /// <param name="child">Key or name of the child region (case insinsitive).</param>
         /// <param name="key">Key value of the child region, if found.</param>
 
-        protected bool TryGetChildKey( IHierarchicalMetadata parent, string child, out string key )
+        protected bool TryGetChildKey( RegionalMetadata parent, string child, out string key )
         {
             var keys = parent?.ChildRegionKeys;
 

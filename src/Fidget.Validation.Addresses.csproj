@@ -22,6 +22,7 @@
 
     <ItemGroup>
       <Folder Include="Client\Decorators\" />
+      <Folder Include="Service\Metadata\Internal\" />
     </ItemGroup>
 
 </Project>

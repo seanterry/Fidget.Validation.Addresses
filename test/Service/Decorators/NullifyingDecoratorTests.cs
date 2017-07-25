@@ -1,4 +1,4 @@
-﻿using Fidget.Validation.Addresses.Service.Metadata;
+﻿using Fidget.Validation.Addresses.Metadata;
 using Moq;
 using System;
 using System.Threading.Tasks;
@@ -33,10 +33,7 @@ namespace Fidget.Validation.Addresses.Service.Decorators
 
         public class Query : NullifyingDecoratorTests
         {
-            class Metadata : ICommonMetadata
-            {
-                public string Id { get; set; }
-            }
+            class Metadata : CommonMetadata {}
 
             string id = Guid.NewGuid().ToString();
             async Task<Metadata> invoke( IServiceClient instance ) => await instance.Query<Metadata>( id );

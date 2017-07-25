@@ -1,4 +1,4 @@
-﻿using Fidget.Validation.Addresses.Service.Metadata;
+﻿using Fidget.Validation.Addresses.Metadata;
 using Fidget.Validation.Addresses.Validation;
 using System;
 using System.Collections.Generic;
@@ -36,15 +36,13 @@ namespace Fidget.Validation.Addresses
 
             return false;
         }
-
         
-
         /// <summary>
         /// Returns gobal metadata information.
         /// </summary>
         /// <param name="service">Address service.</param>
         
-        public static IGlobalMetadata GetGlobal( this IAddressService service )
+        public static GlobalMetadata GetGlobal( this IAddressService service )
         {
             if ( service == null ) throw new ArgumentNullException( nameof( service ) );
 
@@ -63,7 +61,7 @@ namespace Fidget.Validation.Addresses
         /// If metadata is not available for the language, no result will be returned.
         /// </param>
 
-        public static ICountryMetadata GetCountry( this IAddressService service, string countryKey, string language = null )
+        public static CountryMetadata GetCountry( this IAddressService service, string countryKey, string language = null )
         {
             if ( service == null ) throw new ArgumentNullException( nameof( service ) );
             
@@ -83,7 +81,7 @@ namespace Fidget.Validation.Addresses
         /// If metadata is not available for the language, no result will be returned.
         /// </param>
 
-        public static IProvinceMetadata GetProvince( this IAddressService service, string countryKey, string province, string language = null )
+        public static ProvinceMetadata GetProvince( this IAddressService service, string countryKey, string province, string language = null )
         {
             if ( service == null ) throw new ArgumentNullException( nameof( service ) );
             
@@ -104,7 +102,7 @@ namespace Fidget.Validation.Addresses
         /// If metadata is not available for the language, no result will be returned.
         /// </param>
 
-        public static ILocalityMetadata GetLocality( this IAddressService service, string countryKey, string provinceKey, string localityKey, string language = null )
+        public static LocalityMetadata GetLocality( this IAddressService service, string countryKey, string provinceKey, string localityKey, string language = null )
         {
             if ( service == null ) throw new ArgumentNullException( nameof( service ) );
             if ( countryKey == null ) throw new ArgumentNullException( nameof( countryKey ) );
@@ -129,7 +127,7 @@ namespace Fidget.Validation.Addresses
         /// If metadata is not available for the language, no result will be returned.
         /// </param>
 
-        public static ISublocalityMetadata GetSublocality( this IAddressService service, string countryKey, string provinceKey, string localityKey, string sublocalityKey, string language = null )
+        public static SublocalityMetadata GetSublocality( this IAddressService service, string countryKey, string provinceKey, string localityKey, string sublocalityKey, string language = null )
         {
             if ( service == null ) throw new ArgumentNullException( nameof( service ) );
             if ( countryKey == null ) throw new ArgumentNullException( nameof( countryKey ) );

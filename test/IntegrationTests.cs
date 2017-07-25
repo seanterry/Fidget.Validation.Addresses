@@ -1,4 +1,4 @@
-﻿using Fidget.Validation.Addresses.Service.Metadata.Internal;
+﻿using Fidget.Validation.Addresses.Metadata;
 using System.Threading.Tasks;
 using Xunit;
 

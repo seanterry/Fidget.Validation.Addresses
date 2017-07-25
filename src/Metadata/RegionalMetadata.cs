@@ -2,13 +2,13 @@
 using Newtonsoft.Json;
 using System.Collections.Generic;
 
-namespace Fidget.Validation.Addresses.Service.Metadata.Internal
+namespace Fidget.Validation.Addresses.Metadata
 {
     /// <summary>
     /// Defines metadata available at any regional level.
     /// </summary>
 
-    abstract class RegionalMetadata : CommonMetadata, IRegionalMetadata
+    public abstract class RegionalMetadata : CommonMetadata
     {
         /// <summary>
         /// Gets the key of the region, which uniquely identifies it within its parent data element.
@@ -21,21 +21,21 @@ namespace Fidget.Validation.Addresses.Service.Metadata.Internal
         /// </remarks>
 
         [JsonProperty("key")]
-        public string Key { get; set; }
+        public string Key { get; internal set; }
 
         /// <summary>
         /// Gets the localized name of the region, if different from <see cref="Key"/>
         /// </summary>
         
         [JsonProperty("name")]
-        public string Name { get; set; }
+        public string Name { get; internal set; }
 
         /// <summary>
         /// Gets the latinized name of the region if <see cref="Name"/> is not in a latin script.
         /// </summary>
         
         [JsonProperty("lname")]
-        public string LatinName { get; set; }
+        public string LatinName { get; internal set; }
 
         /// <summary>
         /// Gets the language for the regional data (if known).
@@ -49,7 +49,7 @@ namespace Fidget.Validation.Addresses.Service.Metadata.Internal
         /// </remarks>
 
         [JsonProperty("lang")]
-        public string Language { get; set; }
+        public string Language { get; internal set; }
 
         /// <summary>
         /// Gets the collection of address elements that are required for addresses in the region.
@@ -62,7 +62,7 @@ namespace Fidget.Validation.Addresses.Service.Metadata.Internal
 
         [JsonProperty("require")]
         [JsonConverter(typeof(AddressFieldCollectionConverter))]
-        public IEnumerable<AddressField> Required { get; set; }
+        public IEnumerable<AddressField> Required { get; internal set; }
 
         /// <summary>
         /// Gets a regular expression pattern to use for validating the postal code.
@@ -76,7 +76,7 @@ namespace Fidget.Validation.Addresses.Service.Metadata.Internal
         /// </remarks>
 
         [JsonProperty("zip")]
-        public string PostalCodePattern { get; set; }
+        public string PostalCodePattern { get; internal set; }
 
         /// <summary>
         /// Gets a regular expression pattern that overrides the country <see cref="PostalCodePattern"/> for the region
@@ -88,7 +88,7 @@ namespace Fidget.Validation.Addresses.Service.Metadata.Internal
         /// </remarks>
 
         [JsonProperty("xzip")]
-        public string PostalCodePatternOverride { get; set; }
+        public string PostalCodePatternOverride { get; internal set; }
 
         /// <summary>
         /// Gets the <see cref="Key"/> values of this region's sub-regions (if any).
@@ -100,7 +100,7 @@ namespace Fidget.Validation.Addresses.Service.Metadata.Internal
 
         [JsonProperty("sub_keys")]
         [JsonConverter(typeof(TildeDelimitedStringConverter))]
-        public IEnumerable<string> ChildRegionKeys { get; set; }
+        public IEnumerable<string> ChildRegionKeys { get; internal set; }
 
         /// <summary>
         /// Gets the <see cref="Name"/> values of this region's sub-regions (if any).
@@ -115,7 +115,7 @@ namespace Fidget.Validation.Addresses.Service.Metadata.Internal
 
         [JsonProperty("sub_names")]
         [JsonConverter(typeof(TildeDelimitedStringConverter))]
-        public IEnumerable<string> ChildRegionNames { get; set; }
+        public IEnumerable<string> ChildRegionNames { get; internal set; }
 
         /// <summary>
         /// Gets the <see cref="LatinName"/> values of this region's sub-regions (if any).
@@ -128,7 +128,7 @@ namespace Fidget.Validation.Addresses.Service.Metadata.Internal
         
         [JsonProperty("sub_lnames")]
         [JsonConverter(typeof(TildeDelimitedStringConverter))]
-        public IEnumerable<string> ChildRegionLatinNames { get; set; }
+        public IEnumerable<string> ChildRegionLatinNames { get; internal set; }
         
         /// <summary>
         /// Gets whether child regions have their own children.
@@ -140,6 +140,6 @@ namespace Fidget.Validation.Addresses.Service.Metadata.Internal
 
         [JsonProperty("sub_mores")]
         [JsonConverter(typeof(TildeDelimitedBooleanConverter))]
-        public IEnumerable<bool> ChildRegionExpands { get; set; }
+        public IEnumerable<bool> ChildRegionExpands { get; internal set; }
     }
 }

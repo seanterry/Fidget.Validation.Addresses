@@ -1,5 +1,4 @@
-﻿using Fidget.Validation.Addresses.Service.Metadata;
-using Fidget.Validation.Addresses.Service.Metadata.Internal;
+﻿using Fidget.Validation.Addresses.Metadata;
 using Moq;
 using System;
 using System.Collections.Generic;
@@ -37,7 +36,7 @@ namespace Fidget.Validation.Addresses.Service.Adapters
 
             [Theory]
             [MemberData(nameof(QueryTestCases))]
-            public async Task Returns_clientQuery( IGlobalMetadata response )
+            public async Task Returns_clientQuery( GlobalMetadata response )
             {
                 MockClient.Setup( _=> _.Query<GlobalMetadata>( "data" ) ).ReturnsAsync( response as GlobalMetadata );
 
@@ -66,7 +65,7 @@ namespace Fidget.Validation.Addresses.Service.Adapters
 
             [Theory]
             [MemberData(nameof(CountryNotFoundCases))]
-            public void WhenCountryNotFound_returns_false( IGlobalMetadata global, string country )
+            public void WhenCountryNotFound_returns_false( GlobalMetadata global, string country )
             {
                 var found = instance.TryGetCountryKey( global, country, out string key );
                 Assert.False( found );
@@ -91,7 +90,7 @@ namespace Fidget.Validation.Addresses.Service.Adapters
 
             [Theory]
             [MemberData(nameof(CountryFoundCases))]
-            public void WhenCountryFound_returns_true( IGlobalMetadata global, string country, string expected )
+            public void WhenCountryFound_returns_true( GlobalMetadata global, string country, string expected )
             {
                 var found = instance.TryGetCountryKey( global, country, out string actual );
                 Assert.True( found );

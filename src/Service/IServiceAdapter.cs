@@ -1,4 +1,4 @@
-﻿using Fidget.Validation.Addresses.Service.Metadata;
+﻿using Fidget.Validation.Addresses.Metadata;
 using System.Threading.Tasks;
 
 namespace Fidget.Validation.Addresses.Service
@@ -13,7 +13,7 @@ namespace Fidget.Validation.Addresses.Service
         /// Returns global-level address metadata.
         /// </summary>
 
-        Task<IGlobalMetadata> GetGlobal();
+        Task<GlobalMetadata> GetGlobal();
 
         /// <summary>
         /// Returns metadata for the specified country if it is available.
@@ -22,7 +22,7 @@ namespace Fidget.Validation.Addresses.Service
         /// <param name="country">Identifier of the country to return.</param>
         /// <param name="language">Language code for the metadata to return.</param>
 
-        Task<ICountryMetadata> GetCountry( string country, string language );
+        Task<CountryMetadata> GetCountry( string country, string language );
 
         /// <summary>
         /// Returns metadata for the specified province if it is available.
@@ -31,6 +31,6 @@ namespace Fidget.Validation.Addresses.Service
         /// <param name="province">Province key or name.</param>
         /// <param name="language">Language code for the metadata to return.</param>
 
-        Task<IProvinceMetadata> GetProvince( ICountryMetadata country, string province, string language );
+        Task<ProvinceMetadata> GetProvince( CountryMetadata country, string province, string language );
     }
 }

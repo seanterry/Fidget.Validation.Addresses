@@ -1,4 +1,4 @@
-﻿using Fidget.Validation.Addresses.Service.Metadata;
+﻿using Fidget.Validation.Addresses.Metadata;
 using Fidget.Validation.Addresses.Validation;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -15,7 +15,7 @@ namespace Fidget.Validation.Addresses
         /// Returns gobal metadata information.
         /// </summary>
 
-        Task<IGlobalMetadata> GetGlobalAsync();
+        Task<GlobalMetadata> GetGlobalAsync();
 
         /// <summary>
         /// Returns metadata for the specified country if it is available.
@@ -26,7 +26,7 @@ namespace Fidget.Validation.Addresses
         /// If metadata is not available for the language, no result will be returned.
         /// </param>
 
-        Task<ICountryMetadata> GetCountryAsync( string countryKey, string language = null );
+        Task<CountryMetadata> GetCountryAsync( string countryKey, string language = null );
 
         /// <summary>
         /// Returns metadata for the specified province if it is available.
@@ -38,7 +38,7 @@ namespace Fidget.Validation.Addresses
         /// If metadata is not available for the language, no result will be returned.
         /// </param>
 
-        Task<IProvinceMetadata> GetProvinceAsync( string countryKey, string province, string language = null );
+        Task<ProvinceMetadata> GetProvinceAsync( string countryKey, string province, string language = null );
 
         /// <summary>
         /// Returns metadata for the specified locality if it is available.
@@ -51,7 +51,7 @@ namespace Fidget.Validation.Addresses
         /// If metadata is not available for the language, no result will be returned.
         /// </param>
 
-        Task<ILocalityMetadata> GetLocalityAsync( string countryKey, string provinceKey, string localityKey, string language = null );
+        Task<LocalityMetadata> GetLocalityAsync( string countryKey, string provinceKey, string localityKey, string language = null );
 
         /// <summary>
         /// Returns metadata for the specified sublocality if it is available.
@@ -65,7 +65,7 @@ namespace Fidget.Validation.Addresses
         /// If metadata is not available for the language, no result will be returned.
         /// </param>
 
-        Task<ISublocalityMetadata> GetSublocalityAsync( string countryKey, string provinceKey, string localityKey, string sublocalityKey, string language = null );
+        Task<SublocalityMetadata> GetSublocalityAsync( string countryKey, string provinceKey, string localityKey, string sublocalityKey, string language = null );
 
         /// <summary>
         /// Returns whether the given country identifier is known by the global metadata.
@@ -74,7 +74,7 @@ namespace Fidget.Validation.Addresses
         /// <param name="value">Country identifier.</param>
         /// <param name="countryKey">Key of the country, if found.</param>
 
-        bool TryGetCountryKey( IGlobalMetadata global, string value, out string countryKey );
+        bool TryGetCountryKey( GlobalMetadata global, string value, out string countryKey );
 
         /// <summary>
         /// Returns whether the specified regional identifier is a child of the given parent region.
@@ -83,7 +83,7 @@ namespace Fidget.Validation.Addresses
         /// <param name="value">Key, name, or latin name of the child region.</param>
         /// <param name="key">Key of the child region, if found.</param>
 
-        bool TryGetChildKey( IHierarchicalMetadata parent, string value, out string key );
+        bool TryGetChildKey( RegionalMetadata parent, string value, out string key );
 
         /// <summary>
         /// Validates the given address.

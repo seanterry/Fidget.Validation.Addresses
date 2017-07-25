@@ -1,5 +1,4 @@
-﻿using Fidget.Validation.Addresses.Service.Metadata;
-using Fidget.Validation.Addresses.Service.Metadata.Internal;
+﻿using Fidget.Validation.Addresses.Metadata;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -32,7 +31,7 @@ namespace Fidget.Validation.Addresses.Service.Adapters
         /// Returns global metadata.
         /// </summary>
         
-        public async Task<IGlobalMetadata> Query() => await Client.Query<GlobalMetadata>( "data" );
+        public async Task<GlobalMetadata> Query() => await Client.Query<GlobalMetadata>( "data" );
 
         /// <summary>
         /// Returns whether the given country value can be located in the global metadata.
@@ -44,7 +43,7 @@ namespace Fidget.Validation.Addresses.Service.Adapters
         /// </param>
         /// <param name="key">Key of the country, if found.</param>
         
-        public bool TryGetCountryKey( IGlobalMetadata global, string country, out string key )
+        public bool TryGetCountryKey( GlobalMetadata global, string country, out string key )
         {
             var countries = global?.Countries;
 

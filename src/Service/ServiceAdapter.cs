@@ -1,5 +1,4 @@
-﻿using Fidget.Validation.Addresses.Service.Metadata;
-using Fidget.Validation.Addresses.Service.Metadata.Internal;
+﻿using Fidget.Validation.Addresses.Metadata;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -36,7 +35,7 @@ namespace Fidget.Validation.Addresses.Service
         /// <param name="keys">Keys for the identifier.</param>
 
         [Obsolete]
-        string BuildIdentifier( string language, ICommonMetadata parent, string key ) => $"{parent.Id}/{key}{(language != null ? $"--{language}" : string.Empty)}";
+        string BuildIdentifier( string language, CommonMetadata parent, string key ) => $"{parent.Id}/{key}{(language != null ? $"--{language}" : string.Empty)}";
 
         /// <summary>
         /// Builds and returns the data service identifier based on the given keys and language.
@@ -50,7 +49,7 @@ namespace Fidget.Validation.Addresses.Service
         /// Returns global-level address metadata.
         /// </summary>
 
-        public async Task<IGlobalMetadata> GetGlobal() => await Client.Query<GlobalMetadata>( "data" );
+        public async Task<GlobalMetadata> GetGlobal() => await Client.Query<GlobalMetadata>( "data" );
 
 
         /// <summary>
@@ -60,7 +59,7 @@ namespace Fidget.Validation.Addresses.Service
         /// <param name="country">Identifier of the country to return.</param>
         /// <param name="language">Language code for the metadata to return.</param>
 
-        public async Task<ICountryMetadata> GetCountry( string country, string language )
+        public async Task<CountryMetadata> GetCountry( string country, string language )
         {
             var global = await GetGlobal();
             var defaults = await Client.Query<CountryMetadata>( "data/ZZ" );
@@ -97,7 +96,7 @@ namespace Fidget.Validation.Addresses.Service
         /// <param name="value">Key, name, or latin name of the child region.</param>
         /// <param name="key">Key of the child region, if found.</param>
 
-        bool TryGetChildKey( IHierarchicalMetadata parent, string value, out string key )
+        bool TryGetChildKey( RegionalMetadata parent, string value, out string key )
         {
             int? getKeyIndex( params IEnumerable<string>[] collections )
             {
@@ -129,7 +128,7 @@ namespace Fidget.Validation.Addresses.Service
         /// <param name="province">Province key or name.</param>
         /// <param name="language">Language code for the metadata to return.</param>
 
-        public async Task<IProvinceMetadata> GetProvince( ICountryMetadata country, string province, string language ) =>
+        public async Task<ProvinceMetadata> GetProvince( CountryMetadata country, string province, string language ) =>
             TryGetChildKey( country, province, out string provinceKey )
                 ? await Client.Query<ProvinceMetadata>( BuildIdentifier( language, country, provinceKey ) )
                 : null;

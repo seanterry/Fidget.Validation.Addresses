@@ -1,6 +1,5 @@
 ﻿using Fidget.Validation.Addresses.Service;
-using Fidget.Validation.Addresses.Service.Metadata;
-using Fidget.Validation.Addresses.Service.Metadata.Internal;
+using Fidget.Validation.Addresses.Metadata;
 using Fidget.Validation.Addresses.Validation;
 using Moq;
 using System;
@@ -60,7 +59,7 @@ namespace Fidget.Validation.Addresses
 
             [Theory]
             [MemberData( nameof( GetGlobalResponses ) )]
-            public async Task Returns_valueFromClient( IGlobalMetadata expected )
+            public async Task Returns_valueFromClient( GlobalMetadata expected )
             {
                 MockAdapter.Setup( _ => _.GetGlobal() ).ReturnsAsync( (GlobalMetadata)expected ).Verifiable();
                 var actual = await instance.GetGlobalAsync();
@@ -75,7 +74,7 @@ namespace Fidget.Validation.Addresses
             string country;
             string language;
             
-            async Task<ICountryMetadata> invoke() => await instance.GetCountryAsync( country, language );
+            async Task<CountryMetadata> invoke() => await instance.GetCountryAsync( country, language );
 
             /// <summary>
             /// Country scenarios.
@@ -92,7 +91,7 @@ namespace Fidget.Validation.Addresses
 
             [Theory]
             [MemberData( nameof( GetCountryValues ) )]
-            public async Task Returns_valueFromServiceAdapter( string countryKey, string language, ICountryMetadata expected )
+            public async Task Returns_valueFromServiceAdapter( string countryKey, string language, CountryMetadata expected )
             {
                 var global = new GlobalMetadata();
                 MockAdapter.Setup( _=> _.GetGlobal() ).ReturnsAsync( global ).Verifiable();
@@ -106,7 +105,7 @@ namespace Fidget.Validation.Addresses
 
         public class GetProvinceAsync : AddressServiceTests
         {
-            async Task<IProvinceMetadata> invoke( string country, string province, string language ) => await instance.GetProvinceAsync( country, province, language );
+            async Task<ProvinceMetadata> invoke( string country, string province, string language ) => await instance.GetProvinceAsync( country, province, language );
 
             public static IEnumerable<object[]> GetArguments()
             {
@@ -132,7 +131,7 @@ namespace Fidget.Validation.Addresses
             
             [Theory]
             [MemberData( nameof( GetArguments ) )]
-            public async Task Returns_clientResult( IGlobalMetadata global, ICountryMetadata country, IProvinceMetadata expected, string language )
+            public async Task Returns_clientResult( GlobalMetadata global, CountryMetadata country, ProvinceMetadata expected, string language )
             {
                 var countryValue = country?.Key;
                 var provinceValue = expected?.Key;
@@ -151,7 +150,7 @@ namespace Fidget.Validation.Addresses
             string provinceKey = Guid.NewGuid().ToString();
             string localityKey = Guid.NewGuid().ToString();
             string language = Guid.NewGuid().ToString();
-            async Task<ILocalityMetadata> invoke() => await instance.GetLocalityAsync( countryKey, provinceKey, localityKey, language );
+            async Task<LocalityMetadata> invoke() => await instance.GetLocalityAsync( countryKey, provinceKey, localityKey, language );
 
             [Fact]
             public async Task Requires_countryKey()
@@ -184,7 +183,7 @@ namespace Fidget.Validation.Addresses
 
             [Theory]
             [MemberData( nameof( GetArguments ) )]
-            public async Task Returns_clientResult( string countryKey, string provinceKey, string localityKey, string language, string id, ILocalityMetadata expected )
+            public async Task Returns_clientResult( string countryKey, string provinceKey, string localityKey, string language, string id, LocalityMetadata expected )
             {
                 this.countryKey = countryKey;
                 this.provinceKey = provinceKey;
@@ -205,7 +204,7 @@ namespace Fidget.Validation.Addresses
             string localityKey = Guid.NewGuid().ToString();
             string sublocalityKey = Guid.NewGuid().ToString();
             string language = Guid.NewGuid().ToString();
-            async Task<ISublocalityMetadata> invoke() => await instance.GetSublocalityAsync( countryKey, provinceKey, localityKey, sublocalityKey, language );
+            async Task<SublocalityMetadata> invoke() => await instance.GetSublocalityAsync( countryKey, provinceKey, localityKey, sublocalityKey, language );
 
             [Fact]
             public async Task Requires_countryKey()
@@ -245,7 +244,7 @@ namespace Fidget.Validation.Addresses
 
             [Theory]
             [MemberData( nameof( GetArguments ) )]
-            public async Task Returns_clientResult( string countryKey, string provinceKey, string localityKey, string sublocalityKey, string language, string id, ISublocalityMetadata expected )
+            public async Task Returns_clientResult( string countryKey, string provinceKey, string localityKey, string sublocalityKey, string language, string id, SublocalityMetadata expected )
             {
                 this.countryKey = countryKey;
                 this.provinceKey = provinceKey;
@@ -281,7 +280,7 @@ namespace Fidget.Validation.Addresses
 
             [Theory]
             [MemberData(nameof(CountryNotInGlobalCases))]
-            public void WhenCountryNotInGlobal_returns_false( IGlobalMetadata global, string value )
+            public void WhenCountryNotInGlobal_returns_false( GlobalMetadata global, string value )
             {
                 var actual = instance.TryGetCountryKey( global, value, out string countryKey );
                 Assert.False( actual );
@@ -320,7 +319,7 @@ namespace Fidget.Validation.Addresses
 
             [Theory]
             [MemberData(nameof(ChildNotInParentCases))]
-            public void WhenChildNotInParent_returns_false( IHierarchicalMetadata parent, string value )
+            public void WhenChildNotInParent_returns_false( RegionalMetadata parent, string value )
             {
                 var actual = instance.TryGetChildKey( parent, value, out string key );
                 Assert.False( actual );

@@ -1,5 +1,4 @@
-﻿using Fidget.Validation.Addresses.Service.Metadata;
-using Fidget.Validation.Addresses.Service.Metadata.Internal;
+﻿using Fidget.Validation.Addresses.Metadata;
 using Moq;
 using System;
 using System.Collections.Generic;
@@ -27,7 +26,7 @@ namespace Fidget.Validation.Addresses.Service
 
         public class GetGlobal : ServiceAdapterTests
         {
-            async Task<IGlobalMetadata> invoke() => await instance.GetGlobal();
+            async Task<GlobalMetadata> invoke() => await instance.GetGlobal();
 
             [Fact]
             public async Task Returns_metadataFromClient()
@@ -82,7 +81,7 @@ namespace Fidget.Validation.Addresses.Service
             [Theory]
             [InlineData( null, "XW", null )]
             [MemberData(nameof(WhenCountryNotInGlobalCases))]
-            public async Task WhenCountryNotInGlobal_returns_null( IGlobalMetadata global, string country, string language )
+            public async Task WhenCountryNotInGlobal_returns_null( GlobalMetadata global, string country, string language )
             {
                 MockClient.Setup( _=> _.Query<GlobalMetadata>( "data" ) ).ReturnsAsync( global as GlobalMetadata );
                 var result = await instance.GetCountry( country, language );
@@ -108,7 +107,7 @@ namespace Fidget.Validation.Addresses.Service
 
             [Theory]
             [MemberData(nameof(WhenCountryInGlobal))]
-            public async Task WhenCountryInGlobal_returns_clientResult( IGlobalMetadata global, string country, string language, ICountryMetadata expected )
+            public async Task WhenCountryInGlobal_returns_clientResult( GlobalMetadata global, string country, string language, CountryMetadata expected )
             {
                 MockClient.Setup( _=> _.Query<GlobalMetadata>( "data" ) ).ReturnsAsync( global as GlobalMetadata );
                 MockClient.Setup( _=> _.Query<CountryMetadata>( defaultCountry.Id ) ).ReturnsAsync( defaultCountry );
@@ -160,7 +159,7 @@ namespace Fidget.Validation.Addresses.Service
 
             [Theory]
             [MemberData( nameof( WhenCountryInGlobalCases_Defaults ) )]
-            public async Task WhenCountryInGlobal_returns_clientResultWithDefaults( IGlobalMetadata global, string country, string language, ICountryMetadata expected )
+            public async Task WhenCountryInGlobal_returns_clientResultWithDefaults( GlobalMetadata global, string country, string language, CountryMetadata expected )
             {
                 MockClient.Setup( _ => _.Query<GlobalMetadata>( "data" ) ).ReturnsAsync( global as GlobalMetadata );
                 MockClient.Setup( _ => _.Query<CountryMetadata>( defaultCountry.Id ) ).ReturnsAsync( defaultCountry );
@@ -188,11 +187,11 @@ namespace Fidget.Validation.Addresses.Service
 
         public class GetProvince : ServiceAdapterTests
         {
-            ICountryMetadata country;
+            CountryMetadata country;
             string province;
             string language;
 
-            async Task<IProvinceMetadata> invoke() => await instance.GetProvince( country, province, language );
+            async Task<ProvinceMetadata> invoke() => await instance.GetProvince( country, province, language );
 
             public static IEnumerable<object[]> CountryDoesNotContainProvinceCases()
             {
@@ -216,7 +215,7 @@ namespace Fidget.Validation.Addresses.Service
 
             [Theory]
             [MemberData(nameof(CountryDoesNotContainProvinceCases))]
-            public async Task WhenCountryDoesNotContainProvince_returns_null( ICountryMetadata country, string province, string language )
+            public async Task WhenCountryDoesNotContainProvince_returns_null( CountryMetadata country, string province, string language )
             {
                 this.country = country;
                 this.province = province;
@@ -249,7 +248,7 @@ namespace Fidget.Validation.Addresses.Service
 
             [Theory]
             [MemberData(nameof(CountryContainsProvinceCases))]
-            public async Task WhenCountryContainsProvince_returns_value( ICountryMetadata country, IProvinceMetadata expected, string language, string province )
+            public async Task WhenCountryContainsProvince_returns_value( CountryMetadata country, ProvinceMetadata expected, string language, string province )
             {
                 this.country = country;
                 this.language = language;

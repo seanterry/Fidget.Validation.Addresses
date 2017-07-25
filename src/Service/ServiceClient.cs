@@ -1,4 +1,4 @@
-﻿using Fidget.Validation.Addresses.Service.Metadata;
+﻿using Fidget.Validation.Addresses.Metadata;
 using Newtonsoft.Json;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -35,7 +35,7 @@ namespace Fidget.Validation.Addresses.Service
         /// <typeparam name="T">Type of the metadata response.</typeparam>
         /// <param name="id">Data record to return.</param>
         
-        public async Task<T> Query<T>( string id ) where T: ICommonMetadata
+        public async Task<T> Query<T>( string id ) where T: CommonMetadata
         {
             var uri = $"{Root}/{id}";
             var json = await Client.GetStringAsync( uri );

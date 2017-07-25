@@ -1,4 +1,4 @@
-﻿using Fidget.Validation.Addresses.Service.Metadata;
+﻿using Fidget.Validation.Addresses.Metadata;
 using Microsoft.Extensions.Caching.Memory;
 using Moq;
 using System;
@@ -45,10 +45,7 @@ namespace Fidget.Validation.Addresses.Service.Decorators
 
         public class Query : CachingDecoratorTests
         {
-            class Metadata : ICommonMetadata
-            {
-                public string Id { get; set; }
-            }
+            class Metadata : CommonMetadata {}
 
             string id = Guid.NewGuid().ToString();
             async Task<Metadata> invoke( IServiceClient instance ) => await instance.Query<Metadata>( id );

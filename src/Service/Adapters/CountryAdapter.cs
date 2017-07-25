@@ -1,5 +1,4 @@
-﻿using Fidget.Validation.Addresses.Service.Metadata;
-using Fidget.Validation.Addresses.Service.Metadata.Internal;
+﻿using Fidget.Validation.Addresses.Metadata;
 using System;
 using System.Threading.Tasks;
 
@@ -38,7 +37,7 @@ namespace Fidget.Validation.Addresses.Service.Adapters
         /// </param>
         /// <returns>The specified country, if found; otherwise null.</returns>
 
-        public async Task<ICountryMetadata> Query( string country, string language )
+        public async Task<CountryMetadata> Query( string country, string language )
         {
             var defaultMeta = await Client.Query<CountryMetadata>( "data/ZZ" );
 
@@ -74,7 +73,7 @@ namespace Fidget.Validation.Addresses.Service.Adapters
         /// <param name="province">Key or name of the province (case insinsitive).</param>
         /// <param name="key">Key of the province, if found.</param>
 
-        public bool TryGetProvinceKey( ICountryMetadata country, string province, out string key ) =>
+        public bool TryGetProvinceKey( CountryMetadata country, string province, out string key ) =>
             TryGetChildKey( country, province, out key );
     }
 }

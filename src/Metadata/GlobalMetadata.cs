@@ -2,13 +2,13 @@
 using Newtonsoft.Json;
 using System.Collections.Generic;
 
-namespace Fidget.Validation.Addresses.Service.Metadata.Internal
+namespace Fidget.Validation.Addresses.Metadata
 {
     /// <summary>
     /// Global-level metadata.
     /// </summary>
     
-    class GlobalMetadata : CommonMetadata, IGlobalMetadata
+    public class GlobalMetadata : CommonMetadata
     {
         /// <summary>
         /// Gets the keys of countries for which data is available.
@@ -17,6 +17,6 @@ namespace Fidget.Validation.Addresses.Service.Metadata.Internal
         [JsonProperty("countries")]
         [JsonConverter(typeof(TildeDelimitedStringConverter))]
 
-        public IEnumerable<string> Countries { get; set; }
+        public IEnumerable<string> Countries { get; internal set; }
     }
 }
