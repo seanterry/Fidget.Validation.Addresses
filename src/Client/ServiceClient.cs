@@ -3,22 +3,16 @@ using Newtonsoft.Json;
 using System.Net.Http;
 using System.Threading.Tasks;
 
-namespace Fidget.Validation.Addresses.Service
+namespace Fidget.Validation.Addresses.Client
 {
     /// <summary>
     /// Client for accessing the remote address data service.
     /// </summary>
 
-    partial class ServiceClient : IServiceClient
+    class ServiceClient : IServiceClient
     {
         /// <summary>
-        /// Default service client instance.
-        /// </summary>
-        
-        internal static readonly IServiceClient Default = DependencyInjection.Container.GetInstance<IServiceClient>();
-
-        /// <summary>
-        /// Service root URI.
+        /// Root URI for the google address data service.
         /// </summary>
         
         const string Root = "https://chromium-i18n.appspot.com/ssl-address";

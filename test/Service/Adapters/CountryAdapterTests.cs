@@ -1,4 +1,5 @@
-﻿using Fidget.Validation.Addresses.Metadata;
+﻿using Fidget.Validation.Addresses.Client;
+using Fidget.Validation.Addresses.Metadata;
 using Moq;
 using System;
 using System.Collections.Generic;
@@ -103,7 +104,7 @@ namespace Fidget.Validation.Addresses.Service.Adapters
             public async Task WhenMatched_returns_result( string country, string language, CountryMetadata result )
             {
                 // expected identifier
-                string key = "XW";
+                var key = "XW";
                 var id = $"data/{key}{( language != null ? $"--{language}" : string.Empty )}";
                 var globalMeta = new GlobalMetadata { Id = "data" };
 

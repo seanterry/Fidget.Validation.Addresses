@@ -4,7 +4,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Fidget.Validation.Addresses.Service.Decorators
+namespace Fidget.Validation.Addresses.Client.Decorators
 {
     /// <summary>
     /// Decorator that caches service client responses.

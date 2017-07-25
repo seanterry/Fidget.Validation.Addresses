@@ -1,4 +1,5 @@
-﻿using Fidget.Validation.Addresses.Metadata;
+﻿using Fidget.Validation.Addresses.Client;
+using Fidget.Validation.Addresses.Metadata;
 using Moq;
 using System;
 using System.Collections.Generic;

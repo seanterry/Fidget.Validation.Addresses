@@ -1,14 +1,16 @@
-﻿using Fidget.Validation.Addresses.Metadata;
+﻿using Fidget.Extensions.Reflection;
+using Fidget.Validation.Addresses.Client;
+using Fidget.Validation.Addresses.Metadata;
 using System;
 using System.Threading.Tasks;
 
-namespace Fidget.Validation.Addresses.Service.Decorators
+namespace Fidget.Validation.Addresses.Client.Decorators
 {
     /// <summary>
-    /// Decorator that converts responses to default values of the type when the response is not a valid entry.
+    /// Decorator for providing copies of metadata.
     /// </summary>
 
-    class NullifyingDecorator : IServiceClient
+    class CopyingDecorator : IServiceClient
     {
         /// <summary>
         /// Service client decorated by the current instance.
@@ -17,17 +19,17 @@ namespace Fidget.Validation.Addresses.Service.Decorators
         readonly IServiceClient Client;
 
         /// <summary>
-        /// Constructs a decorator that converts responses to default values of the type when the response is not a valid entry.
+        /// Constructs a decorator that creates copies of the address metadata.
         /// </summary>
         /// <param name="client">Service client decorated by the current instance.</param>
-        
-        public NullifyingDecorator( IServiceClient client )
+
+        public CopyingDecorator( IServiceClient client )
         {
-            Client = client ?? throw new ArgumentNullException( nameof(client) );
+            Client = client ?? throw new ArgumentNullException( nameof( client ) );
         }
 
         /// <summary>
-        /// Returns a query response for the specified record if it has an identifier, otherwise null.
+        /// Returns a cached query response for the specified record if one exists, otherwise querying the remote service.
         /// </summary>
         /// <typeparam name="T">Type of the metadata response.</typeparam>
         /// <param name="id">Data record to return.</param>
@@ -35,12 +37,11 @@ namespace Fidget.Validation.Addresses.Service.Decorators
         public async Task<T> Query<T>( string id ) where T : CommonMetadata
         {
             if ( id == null ) throw new ArgumentNullException( nameof( id ) );
-
+            
             var result = await Client.Query<T>( id );
-
-            return result.Id != null
-                ? result
-                : default(T);
+            var reflector = result.Reflect();
+            
+            return result != null ? reflector.Clone( result ) : result;
         }
     }
 }

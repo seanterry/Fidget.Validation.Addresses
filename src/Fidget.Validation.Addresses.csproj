@@ -21,7 +21,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Client\Decorators\" />
+      <Folder Include="Service\Decorators\" />
       <Folder Include="Service\Metadata\Internal\" />
     </ItemGroup>
 

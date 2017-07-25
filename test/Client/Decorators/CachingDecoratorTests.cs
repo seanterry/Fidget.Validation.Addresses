@@ -6,7 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
 
-namespace Fidget.Validation.Addresses.Service.Decorators
+namespace Fidget.Validation.Addresses.Client.Decorators
 {
     public class CachingDecoratorTests
     {
@@ -15,31 +15,22 @@ namespace Fidget.Validation.Addresses.Service.Decorators
 
         IServiceClient client => MockClient?.Object;
         IMemoryCache cache => MockCache?.Object;
-
-        IServiceClient create() => new CachingDecorator( client, cache );
-
+        IServiceClient instance => new CachingDecorator( client, cache );
+        
         public class Constructor : CachingDecoratorTests
         {
             [Fact]
             public void Requires_client()
             {
                 MockClient = null;
-                Assert.Throws<ArgumentNullException>( nameof( client ), () => create() );
+                Assert.Throws<ArgumentNullException>( nameof( client ), () => instance );
             }
 
             [Fact]
             public void Requires_cache()
             {
                 MockCache = null;
-                Assert.Throws<ArgumentNullException>( nameof(cache), ()=> create() );
-            }
-
-            [Fact]
-            public void Implements_IServiceClient()
-            {
-                var actual = create();
-                Assert.IsType<CachingDecorator>( actual );
-                Assert.IsAssignableFrom<IServiceClient>( actual );
+                Assert.Throws<ArgumentNullException>( nameof(cache), ()=> instance );
             }
         }
 
@@ -48,7 +39,7 @@ namespace Fidget.Validation.Addresses.Service.Decorators
             class Metadata : CommonMetadata {}
 
             string id = Guid.NewGuid().ToString();
-            async Task<Metadata> invoke( IServiceClient instance ) => await instance.Query<Metadata>( id );
+            async Task<Metadata> invoke() => await instance.Query<Metadata>( id );
 
             Mock<ICacheEntry> MockCacheEntry = new Mock<ICacheEntry>();
             ICacheEntry cacheEntry => MockCacheEntry?.Object;
@@ -59,24 +50,25 @@ namespace Fidget.Validation.Addresses.Service.Decorators
             public async Task Requires_id()
             {
                 id = null;
-                var instance = create();
-                await Assert.ThrowsAsync<ArgumentNullException>( nameof(id), () => invoke( instance ) );
+                await Assert.ThrowsAsync<ArgumentNullException>( nameof(id), () => invoke() );
             }
 
             [Fact]
-            public async Task Returns_valueFromCache_onCacheHit()
+            public async Task WhenCacheHit_returns_cachedValue()
             {
-                var instance = create();
                 var expected = new Metadata();
                 object cached = new Lazy<Task<Metadata>>( () => Task.FromResult( expected ), LazyThreadSafetyMode.PublicationOnly );
                 
                 MockCache.Setup( _=> _.TryGetValue( key, out cached ) ).Returns( true );
                 
-                var actual = await invoke( instance );
+                var actual = await invoke();
                 Assert.Same( expected, actual );
             }
 
-            // configures a cache miss scenario where the value is populated by the underlying client
+            /// <summary>
+            /// Configures a cache miss scenario where the value is populated by the underlying client 
+            /// </summary>
+            
             Metadata configureCacheMiss()
             {
                 var expected = new Metadata();
@@ -90,31 +82,19 @@ namespace Fidget.Validation.Addresses.Service.Decorators
             }
 
             [Fact]
-            public async Task Returns_valueFromClient_onCacheMiss()
+            public async Task WhenCacheMiss_returns_clientValue()
             {
-                var instance = create();
                 var expected = configureCacheMiss();
-                
-                var actual = await invoke( instance );
+                var actual = await invoke();
                 Assert.Same( expected, actual );
 
-                // ensure value was cached
+                // ensure value was cached for 12 hours
                 MockCache.Verify( _ => _.CreateEntry( key ), Times.Once );
-            }
-
-            [Fact]
-            public async Task Caches_forTwelveHours()
-            {
-                var instance = create();
-                var expected = configureCacheMiss();
-
-                await invoke( instance );
-
                 Assert.Equal( 12, cacheEntry.AbsoluteExpirationRelativeToNow.Value.Hours );
             }
 
             [Fact]
-            public async Task Reinitializes_whenInitializeFails()
+            public async Task WhenInitializationFails_reinitializes()
             {
                 var expected = configureCacheMiss();
                 
@@ -125,10 +105,8 @@ namespace Fidget.Validation.Addresses.Service.Decorators
                     .ReturnsAsync( expected )
                     .Callback( () => { if ( calls++ == 0 ) throw new Exception(); } );
 
-                var instance = create();
-
                 // first call should fail
-                await Assert.ThrowsAsync<Exception>( () => invoke( instance ) );
+                await Assert.ThrowsAsync<Exception>( () => invoke() );
 
                 // second call (via the lazy) should succeed
                 var lazy = cacheEntry.Value as Lazy<Task<Metadata>>;

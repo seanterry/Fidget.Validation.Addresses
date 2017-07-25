@@ -1,5 +1,6 @@
-﻿using Fidget.Validation.Addresses.Service;
-using Fidget.Validation.Addresses.Service.Decorators;
+﻿using Fidget.Validation.Addresses.Client;
+using Fidget.Validation.Addresses.Client.Decorators;
+using Fidget.Validation.Addresses.Service;
 using Fidget.Validation.Addresses.Validation;
 using Microsoft.Extensions.Caching.Memory;
 using StructureMap;
@@ -21,10 +22,11 @@ namespace Fidget.Validation.Addresses
             void configure( ConfigurationExpression config )
             {
                 config.For<IMemoryCache>().Use( new MemoryCache( new MemoryCacheOptions() ) ).Singleton();
-                config.For<IServiceClient>().Use<ServiceClient>().Singleton();
-                config.For<IServiceClient>().DecorateAllWith<CachingDecorator>().Singleton();
-                config.For<IServiceClient>().DecorateAllWith<NullifyingDecorator>().Singleton();
-                config.For<IServiceClient>().DecorateAllWith<CopyingDecorator>().Singleton();
+                config.For<IServiceClient>().Use<ServiceClient>();
+                config.For<IServiceClient>().DecorateAllWith<CachingDecorator>();
+                config.For<IServiceClient>().DecorateAllWith<NullifyingDecorator>();
+                config.For<IServiceClient>().DecorateAllWith<CopyingDecorator>();
+
                 config.For<IServiceAdapter>().Use<ServiceAdapter>().Singleton();
 
                 config.For<IAddressValidator>().Use<RequiredElementsValidator>().Singleton();
