@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Fidget.Validation.Addresses.Service.Converters
+namespace Fidget.Validation.Addresses.Metadata.Converters
 {
     /// <summary>
     /// Converter handling character arrays containing collections of address fields.

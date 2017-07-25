@@ -1,4 +1,4 @@
-﻿using Fidget.Validation.Addresses.Service.Converters;
+﻿using Fidget.Validation.Addresses.Metadata.Converters;
 using Newtonsoft.Json;
 using System.Collections.Generic;
 
