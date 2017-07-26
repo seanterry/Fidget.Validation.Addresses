@@ -47,5 +47,30 @@ namespace Fidget.Validation.Addresses.Adapters
             
             return key != null;
         }
+
+        /// <summary>
+        /// Builds and returns the data service identifier for the specified entry.
+        /// </summary>
+        /// <param name="parent">Parent region metadata.</param>
+        /// <param name="key">Key of the entry for which to build an identifier.</param>
+        /// <param name="language">Language of the metadata.</param>
+        
+        public string BuildIdentifier( CommonMetadata parent, string key, string language )
+        {
+            if ( parent == null ) throw new ArgumentNullException( nameof( parent ) );
+            if ( key == null ) throw new ArgumentNullException( nameof( key ) );
+            
+            if ( parent?.Id is string root )
+            {
+                // remove language component of parent if present
+                root = root.Contains( "--" )
+                    ? root.Remove( root.IndexOf( "--" ) )
+                    : root;
+
+                return $"{root}/{key}{( language != null ? $"--{language}" : string.Empty )}";
+            }
+
+            else return null;            
+        }
     }
 }

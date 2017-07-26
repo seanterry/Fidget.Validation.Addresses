@@ -1,4 +1,5 @@
 ﻿using Fidget.Validation.Addresses.Metadata;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Xunit;
@@ -170,6 +171,53 @@ namespace Fidget.Validation.Addresses.Adapters
                 var found = instance.TryGetChildKey( meta, value, out string key );
                 Assert.True( found );
                 Assert.Equal( expected, key );
+            }
+        }
+
+        public class BuildIdentifier : KeyServiceTests
+        {
+            CommonMetadata parent = new CountryMetadata { Id = "data/XW" };
+            string key = "XX";
+            string language = null;
+
+            string invoke() => instance.BuildIdentifier( parent, key, language );
+
+            [Fact]
+            public void Requires_parent()
+            {
+                parent = null;
+                Assert.Throws<ArgumentNullException>( nameof(parent), ()=> invoke() );
+            }
+
+            [Fact]
+            public void Requires_key()
+            {
+                key = null;
+                Assert.Throws<ArgumentNullException>( nameof(key), ()=> invoke() );
+            }
+
+            public static IEnumerable<object[]> IdentifierCases => new object[][]
+            {
+                // when language is not requested, it should not be part of the identifier
+                new object[] { new CountryMetadata { Id = "data/XW" }, "XX", null, "data/XW/XX" }  ,
+                new object[] { new CountryMetadata { Id = "data/XW--en" }, "XX", null, "data/XW/XX" },
+
+                // when language is request, it should be part of the identifier
+                new object[] { new CountryMetadata { Id = "data/XW" }, "XX", "en", "data/XW/XX--en" },
+                new object[] { new CountryMetadata { Id = "data/XW--en" }, "XX", "en", "data/XW/XX--en" },
+                new object[] { new CountryMetadata { Id = "data/XW--fr" }, "XX", "en", "data/XW/XX--en" },
+            };
+
+            [Theory]
+            [MemberData(nameof(IdentifierCases))]
+            public void Returns_correct_identifier( CommonMetadata parent, string key, string language, string expected )
+            {
+                this.parent = parent;
+                this.key = key;
+                this.language = language;
+
+                var actual = invoke();
+                Assert.Equal( expected, actual );
             }
         }
     }

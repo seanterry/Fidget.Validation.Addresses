@@ -25,5 +25,14 @@ namespace Fidget.Validation.Addresses.Adapters
         /// <param name="key">The located key of the child region if found, otherwise null.</param>
 
         bool TryGetChildKey( RegionalMetadata meta, string value, out string key );
+
+        /// <summary>
+        /// Builds and returns the data service identifier for the specified entry.
+        /// </summary>
+        /// <param name="parent">Parent region metadata.</param>
+        /// <param name="key">Key of the entry for which to build an identifier.</param>
+        /// <param name="language">Language of the metadata (optional).</param>
+
+        string BuildIdentifier( CommonMetadata parent, string key, string language = null );
     }
 }
