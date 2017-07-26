@@ -34,9 +34,8 @@ namespace Fidget.Validation.Addresses.Adapters
         /// </summary>
         /// <param name="client">Service client that will back the instance.</param>
         /// <param name="country">Country metadata adapter.</param>
-        /// <param name="keyService"Metadata key service.></param>
-        /// <param name="keyService"></param>
-        
+        /// <param name="keyService">Metadata key service.</param>
+
         public ProvinceAdapter( IServiceClient client, ICountryAdapter country, IKeyService keyService )
         {
             Client = client ?? throw new ArgumentNullException( nameof(client) );

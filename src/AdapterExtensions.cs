@@ -62,5 +62,21 @@ namespace Fidget.Validation.Addresses
 
             return adapter.QueryAsync( country, province, language ).Result;
         }
+
+        /// <summary>
+        /// Returns the metadata for the specified locality.
+        /// </summary>
+        /// <param name="adapter">Locality service adapter.</param>
+        /// <param name="country">Key of the containing country.</param>
+        /// <param name="province">Key or name of the containing province.</param>
+        /// <param name="locality">Key or name of the locality.</param>
+        /// <param name="language">Requested language of the metadata.</param>
+        
+        public static LocalityMetadata Query( this ILocalityAdapter adapter, string country, string province, string locality, string language = null )
+        {
+            if ( adapter == null ) throw new ArgumentNullException( nameof( adapter ) );
+
+            return adapter.QueryAsync( country, province, locality, language ).Result;
+        }
     }
 }
