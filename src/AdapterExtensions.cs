@@ -21,5 +21,31 @@ namespace Fidget.Validation.Addresses
 
             return adapter.QueryAsync().Result;
         }
+
+        /// <summary>
+        /// Returns the default country metadata.
+        /// </summary>
+        /// <param name="adapter">Country service adapter.</param>
+        
+        public static CountryMetadata QueryDefault( this ICountryAdapter adapter )
+        {
+            if ( adapter == null ) throw new ArgumentNullException( nameof( adapter ) );
+
+            return adapter.QueryDefaultAsync().Result;
+        }
+
+        /// <summary>
+        /// Returns the metadata for the specified country.
+        /// </summary>
+        /// <param name="adapter">Country service adapter.</param>
+        /// <param name="country">Key of the country.</param>
+        /// <param name="language">Language of the metadata.</param>
+        
+        public static CountryMetadata Query( this ICountryAdapter adapter, string country, string language = null )
+        {
+            if ( adapter == null ) throw new ArgumentNullException( nameof( adapter ) );
+
+            return adapter.QueryAsync( country, language ).Result;
+        }
     }
 }

@@ -61,6 +61,37 @@ namespace Fidget.Validation.Addresses.Adapters
                 MockClient.VerifyAll();
             }
         }
+         
+        public class QueryDefault
+        {
+            Mock<ICountryAdapter> MockAdapter = new Mock<ICountryAdapter>();
+
+            ICountryAdapter adapter => MockAdapter?.Object;
+            
+            [Fact]
+            public void Requires_adapter()
+            {
+                MockAdapter = null;
+                Assert.Throws<ArgumentNullException>( ()=> adapter.QueryDefault() );
+            }
+
+            public static IEnumerable<object[]> ResultCases => new object[][]
+            {
+                new object[] { null },
+                new object[] { new CountryMetadata() },
+            };
+
+            [Theory]
+            [MemberData(nameof(ResultCases))]
+            public void Returns_adapterResponse( CountryMetadata result )
+            {
+                MockAdapter.Setup( _=> _.QueryDefaultAsync() ).ReturnsAsync( result ).Verifiable();
+
+                var actual = adapter.QueryDefault();
+                Assert.Equal( result, actual );
+                MockAdapter.VerifyAll();
+            }
+        }
 
         public class QueryAsync : CountryAdapterTests
         {
@@ -166,8 +197,47 @@ namespace Fidget.Validation.Addresses.Adapters
                 Assert.Equal( sublocalityType, actual.SublocalityType );
                 Assert.Equal( postalCodeType, actual.PostalCodeType );
             }
+        }
 
-            
+        public class Query
+        {
+            Mock<ICountryAdapter> MockAdapter = new Mock<ICountryAdapter>();
+
+            ICountryAdapter adapter => MockAdapter?.Object;
+            string country;
+            string language;
+
+            CountryMetadata invoke() => adapter.Query( country, language );
+
+            [Fact]
+            public void Requires_adapter()
+            {
+                MockAdapter = null;
+                Assert.Throws<ArgumentNullException>( nameof(adapter), ()=> invoke() );
+            }
+
+            public static IEnumerable<object[]> ResultCases => new object[][]
+            {
+                new object[] { null, null, null },
+                new object[] { null, "en", null },
+                new object[] { "XW", null, null },
+                new object[] { "XW", "en", null },
+                new object[] { "XW", null, new CountryMetadata() },
+                new object[] { "XW", "en", new CountryMetadata() },
+            };
+
+            [Theory]
+            [MemberData(nameof(ResultCases))]
+            public void Returns_adapterResponse( string country, string language, CountryMetadata result )
+            {
+                this.country = country;
+                this.language = language;
+                MockAdapter.Setup( _=> _.QueryAsync( country, language ) ).ReturnsAsync( result ).Verifiable();
+
+                var actual = invoke();
+                Assert.Equal( result, actual );
+                MockAdapter.VerifyAll();
+            }
         }
     }
 }
