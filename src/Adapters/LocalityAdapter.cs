@@ -44,7 +44,7 @@ namespace Fidget.Validation.Addresses.Adapters
         }
 
         /// <summary>
-        /// Returns the metadata for the specified province if found, otherwise null.
+        /// Returns the metadata for the specified locality if found, otherwise null.
         /// </summary>
         /// <param name="country">Key of the containing country.</param>
         /// <param name="province">Key or name of the containing province.</param>
@@ -55,7 +55,7 @@ namespace Fidget.Validation.Addresses.Adapters
         {
             var parent = await Province.QueryAsync( country, province, language );
 
-            if ( !KeyService.TryGetChildKey( parent, province, out string key ) ) return null;
+            if ( !KeyService.TryGetChildKey( parent, locality, out string key ) ) return null;
 
             var id = KeyService.BuildIdentifier( parent, key, language );
             var result = await Client.Query<LocalityMetadata>( id );

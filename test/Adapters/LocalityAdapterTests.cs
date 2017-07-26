@@ -65,7 +65,7 @@ namespace Fidget.Validation.Addresses.Adapters
             {
                 string key = null;
                 MockProvince.Setup( _ => _.QueryAsync( country, province, language ) ).ReturnsAsync( provinceMeta ).Verifiable();
-                MockKeyService.Setup( _ => _.TryGetChildKey( provinceMeta, province, out key ) ).Returns( false ).Verifiable();
+                MockKeyService.Setup( _ => _.TryGetChildKey( provinceMeta, locality, out key ) ).Returns( false ).Verifiable();
 
                 var actual = await instance.QueryAsync( country, province, locality, language );
                 Assert.Null( actual );
@@ -97,7 +97,7 @@ namespace Fidget.Validation.Addresses.Adapters
                 var key = Guid.NewGuid().ToString();
                 var id = $"data/{key}";
                 MockProvince.Setup( _ => _.QueryAsync( country, province, language ) ).ReturnsAsync( provinceMeta ).Verifiable();
-                MockKeyService.Setup( _ => _.TryGetChildKey( provinceMeta, province, out key ) ).Returns( true ).Verifiable();
+                MockKeyService.Setup( _ => _.TryGetChildKey( provinceMeta, locality, out key ) ).Returns( true ).Verifiable();
                 MockKeyService.Setup( _ => _.BuildIdentifier( provinceMeta, key, language ) ).Returns( id ).Verifiable();
                 MockClient.Setup( _ => _.Query<LocalityMetadata>( id ) ).ReturnsAsync( result ).Verifiable();
 

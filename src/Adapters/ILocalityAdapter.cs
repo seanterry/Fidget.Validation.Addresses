@@ -10,10 +10,10 @@ namespace Fidget.Validation.Addresses.Adapters
     public interface ILocalityAdapter
     {
         /// <summary>
-        /// Returns the metadata for the specified province if found, otherwise null.
+        /// Returns the metadata for the specified locality if found, otherwise null.
         /// </summary>
-        /// <param name="country">Key of the country containing the province.</param>
-        /// <param name="province">Key or name of the province containing the locality.</param>
+        /// <param name="country">Key of the containing country.</param>
+        /// <param name="province">Key or name of the containing province.</param>
         /// <param name="locality">Key or name of the locality.</param>
         /// <param name="language">Metadata language (optional).</param>
 
