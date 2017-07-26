@@ -47,5 +47,20 @@ namespace Fidget.Validation.Addresses
 
             return adapter.QueryAsync( country, language ).Result;
         }
+
+        /// <summary>
+        /// Returns the metadata for the specified province.
+        /// </summary>
+        /// <param name="adapter">Province service adapter.</param>
+        /// <param name="country">Key of the country.</param>
+        /// <param name="province">Key or name of the province.</param>
+        /// <param name="language">Language of the metadata.</param>
+        
+        public static ProvinceMetadata Query( this IProvinceAdapter adapter, string country, string province, string language = null )
+        {
+            if ( adapter == null ) throw new ArgumentNullException( nameof( adapter ) );
+
+            return adapter.QueryAsync( country, province, language ).Result;
+        }
     }
 }

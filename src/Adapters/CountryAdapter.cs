@@ -1,8 +1,6 @@
 ﻿using Fidget.Validation.Addresses.Client;
 using Fidget.Validation.Addresses.Metadata;
 using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Fidget.Validation.Addresses.Adapters
@@ -10,7 +8,7 @@ namespace Fidget.Validation.Addresses.Adapters
     /// <summary>
     /// Adapter for querying country metadata.
     /// </summary>
-    
+
     class CountryAdapter : ICountryAdapter
     {
         /// <summary>
