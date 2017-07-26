@@ -30,8 +30,6 @@ namespace Fidget.Validation.Addresses
 
                 config.For<IGlobalAdapter>().Use<GlobalAdapter>();
 
-                config.For<IServiceAdapter>().Use<ServiceAdapter>().Singleton();
-
                 config.For<IAddressValidator>().Use<RequiredElementsValidator>().Singleton();
                 config.For<IAddressValidator>().Use<AllowedElementsValidator>().Singleton();
                 config.For<IValidationContextFactory>().Use<ValidationContext.Factory>().Singleton();
