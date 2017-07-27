@@ -1,0 +1,57 @@
+﻿using Fidget.Commander;
+using Fidget.Commander.Dispatch;
+using Fidget.Validation.Addresses.Client;
+using Fidget.Validation.Addresses.Client.Decorators;
+using Microsoft.Extensions.Caching.Memory;
+using StructureMap;
+using System;
+using System.Net.Http;
+
+namespace Fidget.Validation.Addresses
+{
+    /// <summary>
+    /// Static methods for configuring dependency injection.
+    /// </summary>
+
+    static class DependencyInjection
+    {
+        /// <summary>
+        /// Creates and returns a configured StructureMap container.
+        /// </summary>
+        
+        static Container CreateContainer()
+        {
+            void configure( ConfigurationExpression config )
+            {
+                // register assembly contents
+                config.Scan( scanner =>
+                {
+                    scanner.AssemblyContainingType<AddressData>();
+                    scanner.ConnectImplementationsToTypesClosing( typeof( ICommandHandler<,> ) );
+                    scanner.ConnectImplementationsToTypesClosing( typeof( ICommandDecorator<,> ) );
+                });
+
+                // register command pipeline
+                config.For<IServiceProvider>().Use<StructureMapServiceProvider>();
+                config.For( typeof(ICommandAdapter<,>) ).Use( typeof(CommandAdapter<,>) );
+                config.For<ICommandAdapterFactory>().Use<CommandAdapterFactory>();
+                config.For<ICommandDispatcher>().Use<CommandDispatcher>();
+
+                // register service dependencies
+                config.For<IMemoryCache>().Use( new MemoryCache( new MemoryCacheOptions() ) ).Singleton();
+                config.For<IServiceClient>().Use<ServiceClient>();
+                config.For<IServiceClient>().DecorateAllWith<CachingDecorator>();
+                config.For<IServiceClient>().DecorateAllWith<NullifyingDecorator>();
+                config.For<IServiceClient>().DecorateAllWith<CopyingDecorator>();
+            }
+
+            return new Container( configure );
+        }
+
+        /// <summary>
+        /// Dependency injection container to use at runtime.
+        /// </summary>
+        
+        public static readonly IContainer Container = CreateContainer();
+    }
+}
