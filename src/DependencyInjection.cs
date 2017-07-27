@@ -1,10 +1,11 @@
-﻿using Fidget.Validation.Addresses.Adapters;
+﻿using Fidget.Commander;
+using Fidget.Commander.Dispatch;
 using Fidget.Validation.Addresses.Client;
 using Fidget.Validation.Addresses.Client.Decorators;
-using Fidget.Validation.Addresses.Service;
-using Fidget.Validation.Addresses.Validation;
 using Microsoft.Extensions.Caching.Memory;
 using StructureMap;
+using System;
+using System.Net.Http;
 
 namespace Fidget.Validation.Addresses
 {
@@ -22,18 +23,26 @@ namespace Fidget.Validation.Addresses
         {
             void configure( ConfigurationExpression config )
             {
+                // register assembly contents
+                config.Scan( scanner =>
+                {
+                    scanner.AssemblyContainingType<AddressData>();
+                    scanner.ConnectImplementationsToTypesClosing( typeof( ICommandHandler<,> ) );
+                    scanner.ConnectImplementationsToTypesClosing( typeof( ICommandDecorator<,> ) );
+                });
+
+                // register command pipeline
+                config.For<IServiceProvider>().Use<StructureMapServiceProvider>();
+                config.For( typeof(ICommandAdapter<,>) ).Use( typeof(CommandAdapter<,>) );
+                config.For<ICommandAdapterFactory>().Use<CommandAdapterFactory>();
+                config.For<ICommandDispatcher>().Use<CommandDispatcher>();
+
+                // register service dependencies
                 config.For<IMemoryCache>().Use( new MemoryCache( new MemoryCacheOptions() ) ).Singleton();
                 config.For<IServiceClient>().Use<ServiceClient>();
                 config.For<IServiceClient>().DecorateAllWith<CachingDecorator>();
                 config.For<IServiceClient>().DecorateAllWith<NullifyingDecorator>();
                 config.For<IServiceClient>().DecorateAllWith<CopyingDecorator>();
-
-                config.For<IGlobalAdapter>().Use<GlobalAdapter>();
-
-                config.For<IAddressValidator>().Use<RequiredElementsValidator>().Singleton();
-                config.For<IAddressValidator>().Use<AllowedElementsValidator>().Singleton();
-                config.For<IValidationContextFactory>().Use<ValidationContext.Factory>().Singleton();
-                config.For<IAddressService>().Use<AddressService.Implementation>().Singleton();
             }
 
             return new Container( configure );
