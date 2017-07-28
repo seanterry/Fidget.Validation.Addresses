@@ -237,8 +237,16 @@ namespace Fidget.Validation.Addresses.Client
             
             public static IEnumerable<object[]> IdentifierWithNoLanguageCases = new object[][]
             {
+                // no language component because none was requested
+                new object[] { new GlobalMetadata { Id = "data" }, "XX", null, "data/XX" },
+
+                // no language component because the parent does not allow it
                 new object[] { new CountryMetadata { Id = "data/XW" }, "XA", null, "data/XW/XA" },
-                new object[] { new CountryMetadata { Id = "data/XX--en" }, "XB", null, "data/XX/XB" },
+                new object[] { new CountryMetadata { Id = "data/XX" }, "XB", "en", "data/XX/XB" },
+                new object[] { new ProvinceMetadata { Id = "data/XW/XX" }, "XY", null, "data/XW/XX/XY" },
+                new object[] { new ProvinceMetadata { Id = "data/XW/XX" }, "XY", "en", "data/XW/XX/XY" },
+                new object[] { new LocalityMetadata { Id = "data/XW/XX/XY" }, "XZ", null, "data/XW/XX/XY/XZ" },
+                new object[] { new LocalityMetadata { Id = "data/XW/XX/XY" }, "XZ", "en", "data/XW/XX/XY/XZ" },
             };
 
             /// <summary>
@@ -247,8 +255,16 @@ namespace Fidget.Validation.Addresses.Client
             
             public static IEnumerable<object[]> IdentifierWithLanguageCases = new object[][]
             {
-                new object[] { new CountryMetadata { Id = "data/XW" }, "XA", "en", "data/XW/XA--en" },
-                new object[] { new CountryMetadata { Id = "data/XW--en" }, "XB", "fr", "data/XW/XB--fr" },
+                // language component requested
+                new object[] { new GlobalMetadata { Id = "data" }, "XX", "en", "data/XX--en" },
+
+                // language component becuase the parent requires it
+                new object[] { new CountryMetadata { Id = "data/XW--en" }, "XA", null, "data/XW/XA--en" },
+                new object[] { new CountryMetadata { Id = "data/XW--en" }, "XA", "fr", "data/XW/XA--en" },
+                new object[] { new ProvinceMetadata { Id = "data/XW/XX--en" }, "XY", null, "data/XW/XX/XY--en" },
+                new object[] { new ProvinceMetadata { Id = "data/XW/XX--en" }, "XY", "fr", "data/XW/XX/XY--en" },
+                new object[] { new LocalityMetadata { Id = "data/XW/XX/XY--en" }, "XZ", null, "data/XW/XX/XY/XZ--en" },
+                new object[] { new LocalityMetadata { Id = "data/XW/XX/XY--en" }, "XZ", "fr", "data/XW/XX/XY/XZ--en" },
             };
 
             [Theory]

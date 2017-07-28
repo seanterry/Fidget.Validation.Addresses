@@ -70,15 +70,21 @@ namespace Fidget.Validation.Addresses.Client
 
             if ( parent.Id is string root )
             {
-                // remove language from parent identifier
-                root = root.Contains( "--" )
-                    ? root.Remove( root.IndexOf( "--" ) )
-                    : root;
+                switch ( parent )
+                {
+                    // when the parent is global, we're requesting country data - this is the only case where we encode the language
+                    case GlobalMetadata global:
+                        return language != null
+                            ? $"{root}/{key}--{language}"
+                            : $"{root}/{key}";
 
-                // attach requested language to child identifier
-                return language != null
-                    ? $"{root}/{key}--{language}"
-                    : $"{root}/{key}";
+                    // all other requests use the language of the parent entity
+                    // this is because the default language for a country does not accept the language argument
+                    default:
+                        return root.Contains( "--" )
+                            ? root.Insert( root.IndexOf( "--" ), $"/{key}" )
+                            : $"{root}/{key}";
+                }
             }
 
             return null;
