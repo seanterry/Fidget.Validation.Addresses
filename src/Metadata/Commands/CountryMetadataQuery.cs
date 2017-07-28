@@ -1,8 +1,5 @@
 ﻿using Fidget.Commander;
-using Fidget.Validation.Addresses.Client;
 using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -11,7 +8,7 @@ namespace Fidget.Validation.Addresses.Metadata.Commands
     /// <summary>
     /// Command for querying country metadata.
     /// </summary>
-    
+
     public struct CountryMetadataQuery : ICommand<CountryMetadata>
     {
         /// <summary>

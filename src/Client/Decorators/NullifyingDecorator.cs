@@ -14,7 +14,7 @@ namespace Fidget.Validation.Addresses.Client.Decorators
         /// Service client decorated by the current instance.
         /// </summary>
 
-        readonly IServiceClient Client;
+        internal readonly IServiceClient Client;
 
         /// <summary>
         /// Constructs a decorator that converts responses to default values of the type when the response is not a valid entry.

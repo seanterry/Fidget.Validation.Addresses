@@ -10,6 +10,16 @@ namespace Fidget.Validation.Addresses.Client
     {
         IKeyBuilder instance => new KeyBuilder();
 
+        public class Registration
+        {
+            [Fact]
+            public void IsRegistered()
+            {
+                var actual = DependencyInjection.Container.GetInstance<IKeyBuilder>();
+                Assert.IsType<KeyBuilder>( actual );
+            }
+        }
+
         public class GetChildKey : KeyBuilderTests
         {
             /// <summary>

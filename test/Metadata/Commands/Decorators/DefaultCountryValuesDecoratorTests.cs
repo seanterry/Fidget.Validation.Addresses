@@ -17,6 +17,16 @@ namespace Fidget.Validation.Addresses.Metadata.Commands.Decorators
         IServiceClient client => MockClient?.Object;
         ICommandDecorator<CountryMetadataQuery,CountryMetadata> instance => new DefaultCountryValuesDecorator( client );
 
+        public class Registration
+        {
+            [Fact]
+            public void IsRegistered()
+            {
+                var decorators = DependencyInjection.Container.GetAllInstances<ICommandDecorator<CountryMetadataQuery, CountryMetadata>>();
+                Assert.Contains( decorators, _=> _ is DefaultCountryValuesDecorator );
+            }
+        }
+
         public class Constructor : DefaultCountryValuesDecoratorTests
         {
             [Fact]

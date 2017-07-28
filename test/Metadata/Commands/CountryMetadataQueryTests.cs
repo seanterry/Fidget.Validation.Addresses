@@ -1,9 +1,7 @@
 ﻿using Fidget.Commander;
-using Fidget.Validation.Addresses.Client;
 using Moq;
 using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
@@ -16,6 +14,16 @@ namespace Fidget.Validation.Addresses.Metadata.Commands
         
         IMetadataQueryContext context => FakeContext;
         ICommandHandler<CountryMetadataQuery,CountryMetadata> instance => new CountryMetadataQuery.Handler( context );
+
+        public class Registration
+        {
+            [Fact]
+            public void IsRegistered()
+            {
+                var actual = DependencyInjection.Container.GetInstance<ICommandHandler<CountryMetadataQuery, CountryMetadata>>();
+                Assert.IsType<CountryMetadataQuery.Handler>( actual );
+            }
+        }
 
         public class Constructor : CountryMetadataQueryTests
         {

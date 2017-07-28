@@ -15,6 +15,16 @@ namespace Fidget.Validation.Addresses.Metadata.Commands
 
         IServiceClient client => MockClient?.Object;
         ICommandHandler<GlobalMetadataQuery,GlobalMetadata> instance => new GlobalMetadataQuery.Handler( client );
+        
+        public class Registration
+        {
+            [Fact]
+            public void IsRegistered()
+            {
+                var actual = DependencyInjection.Container.GetInstance<ICommandHandler<GlobalMetadataQuery, GlobalMetadata>>();
+                Assert.IsType<GlobalMetadataQuery.Handler>( actual );
+            }
+        }
 
         public class Constructor : GlobalMetadataQueryTests
         {

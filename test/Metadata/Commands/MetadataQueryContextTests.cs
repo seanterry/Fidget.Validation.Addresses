@@ -18,6 +18,16 @@ namespace Fidget.Validation.Addresses.Metadata.Commands
 
         IMetadataQueryContext instance => new MetadataQueryContext( client, builder, dispatcher );
 
+        public class Registration
+        {
+            [Fact]
+            public void IsRegistered()
+            {
+                var actual = DependencyInjection.Container.GetInstance<IMetadataQueryContext>();
+                Assert.IsType<MetadataQueryContext>( actual );
+            }
+        }
+
         [Fact]
         public void Requires_client()
         {

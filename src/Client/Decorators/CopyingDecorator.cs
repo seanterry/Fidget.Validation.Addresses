@@ -16,7 +16,7 @@ namespace Fidget.Validation.Addresses.Client.Decorators
         /// Service client decorated by the current instance.
         /// </summary>
 
-        readonly IServiceClient Client;
+        internal readonly IServiceClient Client;
 
         /// <summary>
         /// Constructs a decorator that creates copies of the address metadata.
