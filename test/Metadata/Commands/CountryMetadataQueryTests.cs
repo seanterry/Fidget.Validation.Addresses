@@ -15,16 +15,6 @@ namespace Fidget.Validation.Addresses.Metadata.Commands
         IMetadataQueryContext context => FakeContext;
         ICommandHandler<CountryMetadataQuery,CountryMetadata> instance => new CountryMetadataQuery.Handler( context );
 
-        public class Registration
-        {
-            [Fact]
-            public void IsRegistered()
-            {
-                var actual = DependencyInjection.Container.GetInstance<ICommandHandler<CountryMetadataQuery, CountryMetadata>>();
-                Assert.IsType<CountryMetadataQuery.Handler>( actual );
-            }
-        }
-
         public class Constructor : CountryMetadataQueryTests
         {
             [Fact]
@@ -32,6 +22,13 @@ namespace Fidget.Validation.Addresses.Metadata.Commands
             {
                 FakeContext = null;
                 Assert.Throws<ArgumentNullException>( nameof(context), ()=>instance );
+            }
+
+            [Fact]
+            public void IsRegistered()
+            {
+                var actual = DependencyInjection.Container.GetInstance<ICommandHandler<CountryMetadataQuery, CountryMetadata>>();
+                Assert.IsType<CountryMetadataQuery.Handler>( actual );
             }
         }
 
