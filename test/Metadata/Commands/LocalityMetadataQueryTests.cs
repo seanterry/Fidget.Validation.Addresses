@@ -9,14 +9,14 @@ using Xunit;
 
 namespace Fidget.Validation.Addresses.Metadata.Commands
 {
-    public class ProvinceMetadataQueryTests
+    public class LocalityMetadataQueryTests
     {
         FakeContext FakeContext = new FakeContext();
 
         IMetadataQueryContext context => FakeContext;
-        ICommandHandler<ProvinceMetadataQuery, ProvinceMetadata> instance => new ProvinceMetadataQuery.Handler( context );
+        ICommandHandler<LocalityMetadataQuery, LocalityMetadata> instance => new LocalityMetadataQuery.Handler( context );
 
-        public class Constructor : ProvinceMetadataQueryTests
+        public class Constructor : LocalityMetadataQueryTests
         {
             [Fact]
             public void Requires_context()
@@ -28,25 +28,25 @@ namespace Fidget.Validation.Addresses.Metadata.Commands
             [Fact]
             public void IsRegistered()
             {
-                var actual = DependencyInjection.Container.GetInstance<ICommandHandler<ProvinceMetadataQuery, ProvinceMetadata>>();
-                Assert.IsType<ProvinceMetadataQuery.Handler>( actual );
+                var actual = DependencyInjection.Container.GetInstance<ICommandHandler<LocalityMetadataQuery, LocalityMetadata>>();
+                Assert.IsType<LocalityMetadataQuery.Handler>( actual );
             }
         }
 
-        public class Handle : ProvinceMetadataQueryTests
+        public class Handle : LocalityMetadataQueryTests
         {
-            ProvinceMetadataQuery command = new ProvinceMetadataQuery { Country = "XW", Province = "XY", Language = "en"  };
+            LocalityMetadataQuery command = new LocalityMetadataQuery { Country = "XW", Province = "XX", Locality = "XY", Language = "en" };
             CancellationToken cancellationToken = CancellationToken.None;
 
-            Task<ProvinceMetadata> invoke() => instance.Handle( command, cancellationToken );
+            Task<LocalityMetadata> invoke() => instance.Handle( command, cancellationToken );
 
             /// <summary>
-            /// Cases where the province should not be matched.
+            /// Cases where the locality should not be matched.
             /// </summary>
 
             public static IEnumerable<object[]> NotMatchedCases()
             {
-                var parent = new CountryMetadata();
+                var parent = new ProvinceMetadata();
                 var key = "XX";
 
                 // no parent metadata
@@ -61,58 +61,60 @@ namespace Fidget.Validation.Addresses.Metadata.Commands
 
             [Theory]
             [MemberData( nameof( NotMatchedCases ) )]
-            public async Task WhenNotMatched_returns_null( CountryMetadata country, string key, string id )
+            public async Task WhenNotMatched_returns_null( ProvinceMetadata parent, string key, string id )
             {
-                var parentQuery = new CountryMetadataQuery 
-                { 
+                var parentQuery = new ProvinceMetadataQuery
+                {
                     Country = command.Country,
+                    Province = command.Province,
                     Language = command.Language,
                 };
 
-                FakeContext.MockDispatcher.Setup( _ => _.Execute( parentQuery, cancellationToken ) ).ReturnsAsync( country );
-                FakeContext.MockBuilder.Setup( _ => _.GetChildKey( country, command.Province ) ).Returns( key );
-                FakeContext.MockBuilder.Setup( _ => _.BuildIdentifier( country, key, command.Language ) ).Returns( id );
+                FakeContext.MockDispatcher.Setup( _ => _.Execute( parentQuery, cancellationToken ) ).ReturnsAsync( parent );
+                FakeContext.MockBuilder.Setup( _ => _.GetChildKey( parent, command.Locality ) ).Returns( key );
+                FakeContext.MockBuilder.Setup( _ => _.BuildIdentifier( parent, key, command.Language ) ).Returns( id );
 
                 var actual = await invoke();
                 Assert.Null( actual );
 
-                var getChildKeyTimes = country != null ? Times.Once() : Times.Never();
+                var getChildKeyTimes = parent != null ? Times.Once() : Times.Never();
                 var buildIdentifierTimes = key != null ? Times.Once() : Times.Never();
                 FakeContext.MockDispatcher.Verify( _ => _.Execute( parentQuery, cancellationToken ), Times.Once );
-                FakeContext.MockBuilder.Verify( _ => _.GetChildKey( country, command.Province ), getChildKeyTimes );
-                FakeContext.MockBuilder.Verify( _ => _.BuildIdentifier( country, key, command.Language ), buildIdentifierTimes );
+                FakeContext.MockBuilder.Verify( _ => _.GetChildKey( parent, command.Locality ), getChildKeyTimes );
+                FakeContext.MockBuilder.Verify( _ => _.BuildIdentifier( parent, key, command.Language ), buildIdentifierTimes );
 
-                FakeContext.MockClient.Verify( _ => _.Query<ProvinceMetadata>( It.IsAny<string>() ), Times.Never );
+                FakeContext.MockClient.Verify( _ => _.Query<LocalityMetadata>( It.IsAny<string>() ), Times.Never );
             }
 
             /// <summary>
-            /// Cases where the province is matched.
+            /// Cases where the locality is matched.
             /// </summary>
 
             public static IEnumerable<object[]> MatchedCases()
             {
-                var parent = new CountryMetadata();
-                var key = "XX";
-                var id = "data/XW/XX--en";
+                var parent = new ProvinceMetadata();
+                var key = "XY";
+                var id = "data/XW/XX/XY--en";
 
                 yield return new object[] { parent, key, id, null };
-                yield return new object[] { parent, key, id, new ProvinceMetadata() };
+                yield return new object[] { parent, key, id, new LocalityMetadata() };
             }
 
             [Theory]
             [MemberData( nameof( MatchedCases ) )]
-            public async Task WhenMatched_returns_clientResponse( CountryMetadata parent, string key, string id, ProvinceMetadata response )
+            public async Task WhenMatched_returns_clientResponse( ProvinceMetadata parent, string key, string id, LocalityMetadata response )
             {
-                var parentQuery = new CountryMetadataQuery
+                var parentQuery = new ProvinceMetadataQuery
                 {
                     Country = command.Country,
+                    Province = command.Province,
                     Language = command.Language,
                 };
 
                 FakeContext.MockDispatcher.Setup( _ => _.Execute( parentQuery, cancellationToken ) ).ReturnsAsync( parent ).Verifiable();
-                FakeContext.MockBuilder.Setup( _ => _.GetChildKey( parent, command.Province ) ).Returns( key ).Verifiable();
+                FakeContext.MockBuilder.Setup( _ => _.GetChildKey( parent, command.Locality ) ).Returns( key ).Verifiable();
                 FakeContext.MockBuilder.Setup( _ => _.BuildIdentifier( parent, key, command.Language ) ).Returns( id ).Verifiable();
-                FakeContext.MockClient.Setup( _ => _.Query<ProvinceMetadata>( id ) ).ReturnsAsync( response ).Verifiable();
+                FakeContext.MockClient.Setup( _ => _.Query<LocalityMetadata>( id ) ).ReturnsAsync( response ).Verifiable();
 
                 var actual = await invoke();
                 Assert.Equal( response, actual );
