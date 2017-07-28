@@ -46,6 +46,7 @@ namespace Fidget.Validation.Addresses
                 config.For<IServiceClient>().DecorateAllWith<CopyingDecorator>();
                 config.For<IKeyBuilder>().Use<KeyBuilder>();
                 config.For<IMetadataQueryContext>().Use<MetadataQueryContext>();
+                config.For<IAddressService>().Use<AddressService>();
             }
 
             return new Container( configure );
