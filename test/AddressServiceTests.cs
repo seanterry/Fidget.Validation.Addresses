@@ -4,6 +4,7 @@ using Fidget.Validation.Addresses.Metadata.Commands;
 using Moq;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -39,8 +40,6 @@ namespace Fidget.Validation.Addresses
         {
             CancellationToken cancellationToken = CancellationToken.None;
 
-            Task<GlobalMetadata> invoke() => instance.GetGlobalAsync( cancellationToken );
-
             public static IEnumerable<object[]> ResultCases = new object[][]
             {
                 new object[] { null },
@@ -53,8 +52,43 @@ namespace Fidget.Validation.Addresses
             {
                 MockDispatcher.Setup( _=> _.Execute( GlobalMetadataQuery.Default, cancellationToken ) ).ReturnsAsync( result );
 
-                var actual = await invoke();
+                var actual = await instance.GetGlobalAsync( cancellationToken );
                 Assert.Equal( result, actual );
+            }
+        }
+
+        public class GetCountryAsync : AddressServiceTests
+        {
+            CancellationToken cancellationToken = CancellationToken.None;
+
+            public static IEnumerable<object[]> ResultCases()
+            {
+                var countries = new string[] { null, string.Empty, "XX" };
+                var languages = new string[] { null, "en" };
+                var results = new CountryMetadata[] { null, new CountryMetadata() };
+
+                return
+                    from country in countries
+                    from language in languages
+                    from result in results
+                    select new object[] { country, language, result };
+            }
+
+            [Theory]
+            [MemberData(nameof(ResultCases))]
+            public async Task Returns_commandResult( string country, string language, CountryMetadata result )
+            {
+                var query = new CountryMetadataQuery
+                {
+                    Country = country,
+                    Language = language,
+                };
+
+                MockDispatcher.Setup( _=> _.Execute( query, cancellationToken ) ).ReturnsAsync( result ).Verifiable();
+
+                var actual = await instance.GetCountryAsync( country, language, cancellationToken );
+                Assert.Equal( result, actual );
+                MockDispatcher.VerifyAll();
             }
         }
     }

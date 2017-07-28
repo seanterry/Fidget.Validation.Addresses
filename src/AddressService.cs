@@ -40,8 +40,28 @@ namespace Fidget.Validation.Addresses
         /// <summary>
         /// Returns gobal metadata information.
         /// </summary>
+        /// <param name="cancellationToken">Cancellation token.</param>
         
         public async Task<GlobalMetadata> GetGlobalAsync( CancellationToken cancellationToken ) => 
             await Dispatcher.Execute( GlobalMetadataQuery.Default, cancellationToken );
+
+        /// <summary>
+        /// Returns metadata for the specified country.
+        /// </summary>
+        /// <param name="country">Key of the country.</param>
+        /// <param name="language">Requested language of the metadata.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        /// <returns>Metadata for the specified country if found, otherwise null.</returns>
+        
+        public async Task<CountryMetadata> GetCountryAsync( string country, string language, CancellationToken cancellationToken )
+        {
+            var query = new CountryMetadataQuery
+            {
+                Country = country,
+                Language = language,
+            };
+
+            return await Dispatcher.Execute( query, cancellationToken );
+        }
     }
 }

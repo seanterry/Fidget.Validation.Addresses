@@ -19,5 +19,15 @@ namespace Fidget.Validation.Addresses
         /// <param name="cancellationToken">Not used.</param>
 
         Task<GlobalMetadata> GetGlobalAsync( CancellationToken cancellationToken = default(CancellationToken) );
+
+        /// <summary>
+        /// Returns metadata for the specified country.
+        /// </summary>
+        /// <param name="country">Key of the country.</param>
+        /// <param name="language">Requested language of the metadata.</param>
+        /// <param name="cancellationToken">Not used.</param>
+        /// <returns>Metadata for the specified country if found, otherwise null.</returns>
+
+        Task<CountryMetadata> GetCountryAsync( string country, string language = null, CancellationToken cancellationToken = default(CancellationToken) );
     }
 }
