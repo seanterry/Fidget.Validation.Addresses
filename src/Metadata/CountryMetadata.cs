@@ -100,7 +100,7 @@ namespace Fidget.Validation.Addresses.Metadata
         /// </summary>
         /// <remarks>
         /// <see cref="!:https://github.com/googlei18n/libaddressinput/blob/master/common/src/main/java/com/google/i18n/addressinput/common/AddressDataKey.java"/>
-        /// Indicates the type of the name used for the <see cref="RegionalMetadata.PostalCode"/> field.
+        /// Indicates the type of the name used for the <see cref="RegionalMetadata.PostalCodePattern"/> field.
         /// </remarks>
 
         [JsonProperty("zip_name_type")]

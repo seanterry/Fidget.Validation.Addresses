@@ -103,17 +103,6 @@ namespace Fidget.Validation.Addresses.Metadata
         public IEnumerable<string> ChildRegionKeys { get; internal set; }
 
         /// <summary>
-        /// Gets the postal code pattern (country-level only) or post code prefix (all other levels) of the region.
-        /// </summary>
-        /// <remarks>
-        /// <see cref="!:https://github.com/googlei18n/libaddressinput/blob/master/common/src/main/java/com/google/i18n/addressinput/common/AddressDataKey.java"/>
-        /// Encodes the postal code pattern if at the country level, and the postal code prefix if at a level below country.
-        /// </remarks>
-
-        [JsonProperty("zip")]
-        public string PostalCode { get; internal set; }
-
-        /// <summary>
         /// Gets the <see cref="Name"/> values of this region's sub-regions (if any).
         /// </summary>
         /// <remarks>
