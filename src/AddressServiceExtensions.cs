@@ -1,118 +1,93 @@
-﻿using Fidget.Validation.Addresses.Service.Metadata;
+﻿using Fidget.Validation.Addresses.Metadata;
 using System;
+using System.Collections.Generic;
+using System.Text;
+using System.Threading;
 
 namespace Fidget.Validation.Addresses
 {
     /// <summary>
     /// Extension methods related to the address service.
     /// </summary>
-
+    
     public static class AddressServiceExtensions
     {
         /// <summary>
-        /// Returns gobal metadata information.
+        /// Returns global metadata information.
         /// </summary>
-        /// <param name="service">Address service.</param>
+        /// <param name="service">Remote address service.</param>
         
-        public static IGlobalMetadata GetGlobal( this IAddressService service )
+        public static GlobalMetadata GetGlobal( this IAddressService service )
         {
             if ( service == null ) throw new ArgumentNullException( nameof( service ) );
 
-            return service
-                .GetGlobalAsync()
-                .Result;
+            return service.GetGlobalAsync( CancellationToken.None ).Result;
         }
 
         /// <summary>
         /// Returns metadata for the specified country.
         /// </summary>
-        /// <param name="service">Address service.</param>
-        /// <param name="countryKey">Key of the country to return. Use "ZZ" for the default country metadata.</param>
-        /// <param name="language">
-        /// (Optional) Language code for the metadata to return.
-        /// If metadata is not available for the language, no result will be returned.
-        /// </param>
-
-        public static ICountryMetadata GetCountry( this IAddressService service, string countryKey, string language = null )
+        /// <param name="service">Remote address service.</param>
+        /// <param name="country">Key of the country.</param>
+        /// <param name="language">Requested language of the metadata.</param>
+        /// <returns>Metadata for the specified country if found, otherwise null.</returns>
+        
+        public static CountryMetadata GetCountry( this IAddressService service, string country, string language = null )
         {
             if ( service == null ) throw new ArgumentNullException( nameof( service ) );
-            if ( countryKey == null ) throw new ArgumentNullException( nameof( countryKey ) );
 
-            return service
-                .GetCountryAsync( countryKey, language )
-                .Result;
+            return service.GetCountryAsync( country, language, CancellationToken.None ).Result;
         }
 
         /// <summary>
-        /// Returns metadata for the specified province if it is available.
+        /// Returns metadata for the specified province.
         /// </summary>
-        /// <param name="service">Address service.</param>
-        /// <param name="countryKey">Key of the parent country.</param>
-        /// <param name="provinceKey">Key of the province to return.</param>
-        /// <param name="language">
-        /// (Optional) Language code for the metadata to return.
-        /// If metadata is not available for the language, no result will be returned.
-        /// </param>
-
-        public static IProvinceMetadata GetProvince( this IAddressService service, string countryKey, string provinceKey, string language = null )
+        /// <param name="service">Remote address service.</param>
+        /// <param name="country">Key of the containing country.</param>
+        /// <param name="province">Key or name of the province.</param>
+        /// <param name="language">Requested language of the metadata.</param>
+        /// <returns>Metadata for the specified province if found, otherwise null.</returns>
+        
+        public static ProvinceMetadata GetProvince( this IAddressService service, string country, string province, string language = null )
         {
             if ( service == null ) throw new ArgumentNullException( nameof( service ) );
-            if ( countryKey == null ) throw new ArgumentNullException( nameof( countryKey ) );
-            if ( provinceKey == null ) throw new ArgumentNullException( nameof( provinceKey ) );
 
-            return service
-                .GetProvinceAsync( countryKey, provinceKey, language )
-                .Result;
+            return service.GetProvinceAsync( country, province, language, CancellationToken.None ).Result;
         }
 
         /// <summary>
-        /// Returns metadata for the specified locality if it is available.
+        /// Returns metadata for the specified locality.
         /// </summary>
-        /// <param name="service">Address service.</param>
-        /// <param name="countryKey">Key of the parent country.</param>
-        /// <param name="provinceKey">Key of the parent province.</param>
-        /// <param name="localityKey">Key of the locality to return.</param>
-        /// <param name="language">
-        /// (Optional) Language code for the metadata to return.
-        /// If metadata is not available for the language, no result will be returned.
-        /// </param>
+        /// <param name="service">Remote address service.</param>
+        /// <param name="country">Key of the containing country.</param>
+        /// <param name="province">Key or name of the containing province.</param>
+        /// <param name="locality">Key or name of the locality.</param>
+        /// <param name="language">Requested language of the metadata.</param>
+        /// <returns>Metadata for the specified locality if found, otherwise null.</returns>
 
-        public static ILocalityMetadata GetLocality( this IAddressService service, string countryKey, string provinceKey, string localityKey, string language = null )
+        public static LocalityMetadata GetLocality( this IAddressService service, string country, string province, string locality, string language = null )
         {
             if ( service == null ) throw new ArgumentNullException( nameof( service ) );
-            if ( countryKey == null ) throw new ArgumentNullException( nameof( countryKey ) );
-            if ( provinceKey == null ) throw new ArgumentNullException( nameof( provinceKey ) );
-            if ( localityKey == null ) throw new ArgumentNullException( nameof( localityKey ) );
 
-            return service
-                .GetLocalityAsync( countryKey, provinceKey, localityKey, language )
-                .Result;
+            return service.GetLocalityAsync( country, province, locality, language, CancellationToken.None ).Result;
         }
 
         /// <summary>
-        /// Returns metadata for the specified sublocality if it is available.
+        /// Returns metadata for the specified sublocality.
         /// </summary>
-        /// <param name="service">Address service.</param>
-        /// <param name="countryKey">Key of the parent country.</param>
-        /// <param name="provinceKey">Key of the parent province.</param>
-        /// <param name="localityKey">Key of the parent locality.</param>
-        /// <param name="sublocalityKey">Key of the sublocality to return.</param>
-        /// <param name="language">
-        /// (Optional) Language code for the metadata to return.
-        /// If metadata is not available for the language, no result will be returned.
-        /// </param>
-
-        public static ISublocalityMetadata GetSublocality( this IAddressService service, string countryKey, string provinceKey, string localityKey, string sublocalityKey, string language = null )
+        /// <param name="service">Remote address service.</param>
+        /// <param name="country">Key of the containing country.</param>
+        /// <param name="province">Key or name of the containing province.</param>
+        /// <param name="locality">Key or name of the containing locality.</param>
+        /// <param name="sublocality">Key or name of the sublocality.</param>
+        /// <param name="language">Requested language of the metadata.</param>
+        /// <returns>Metadata for the specified sublocality if found, otherwise null.</returns>
+        
+        public static SublocalityMetadata GetSublocality( this IAddressService service, string country, string province, string locality, string sublocality, string language = null )
         {
             if ( service == null ) throw new ArgumentNullException( nameof( service ) );
-            if ( countryKey == null ) throw new ArgumentNullException( nameof( countryKey ) );
-            if ( provinceKey == null ) throw new ArgumentNullException( nameof( provinceKey ) );
-            if ( localityKey == null ) throw new ArgumentNullException( nameof( localityKey ) );
-            if ( sublocalityKey == null ) throw new ArgumentNullException( nameof( sublocalityKey ) );
 
-            return service
-                .GetSublocalityAsync( countryKey, provinceKey, localityKey, sublocalityKey, language )
-                .Result;
+            return service.GetSublocalityAsync( country, province, locality, sublocality, language, CancellationToken.None ).Result;
         }
     }
 }

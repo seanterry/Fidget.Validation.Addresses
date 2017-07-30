@@ -1,4 +1,5 @@
-﻿using Fidget.Validation.Addresses.Service.Metadata;
+﻿using Fidget.Validation.Addresses.Metadata;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Fidget.Validation.Addresses
@@ -12,57 +13,54 @@ namespace Fidget.Validation.Addresses
         /// <summary>
         /// Returns gobal metadata information.
         /// </summary>
+        /// <param name="cancellationToken">Not used.</param>
 
-        Task<IGlobalMetadata> GetGlobalAsync();
-
-        /// <summary>
-        /// Returns metadata for the specified country if it is available.
-        /// </summary>
-        /// <param name="countryKey">Key of the country to return. Use "ZZ" for the default country metadata.</param>
-        /// <param name="language">
-        /// (Optional) Language code for the metadata to return.
-        /// If metadata is not available for the language, no result will be returned.
-        /// </param>
-
-        Task<ICountryMetadata> GetCountryAsync( string countryKey, string language = null );
+        Task<GlobalMetadata> GetGlobalAsync( CancellationToken cancellationToken = default(CancellationToken) );
 
         /// <summary>
-        /// Returns metadata for the specified province if it is available.
+        /// Returns metadata for the specified country.
         /// </summary>
-        /// <param name="countryKey">Key of the parent country.</param>
-        /// <param name="provinceKey">Key of the province to return.</param>
-        /// <param name="language">
-        /// (Optional) Language code for the metadata to return.
-        /// If metadata is not available for the language, no result will be returned.
-        /// </param>
+        /// <param name="country">Key of the country.</param>
+        /// <param name="language">Requested language of the metadata.</param>
+        /// <param name="cancellationToken">Not used.</param>
+        /// <returns>Metadata for the specified country if found, otherwise null.</returns>
 
-        Task<IProvinceMetadata> GetProvinceAsync( string countryKey, string provinceKey, string language = null );
+        Task<CountryMetadata> GetCountryAsync( string country, string language = null, CancellationToken cancellationToken = default(CancellationToken) );
 
         /// <summary>
-        /// Returns metadata for the specified locality if it is available.
+        /// Returns metadata for the specified province.
         /// </summary>
-        /// <param name="countryKey">Key of the parent country.</param>
-        /// <param name="provinceKey">Key of the parent province.</param>
-        /// <param name="localityKey">Key of the locality to return.</param>
-        /// <param name="language">
-        /// (Optional) Language code for the metadata to return.
-        /// If metadata is not available for the language, no result will be returned.
-        /// </param>
+        /// <param name="country">Key of the containing country.</param>
+        /// <param name="province">Key or name of the province.</param>
+        /// <param name="language">Requested language of the metadata.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        /// <returns>Metadata for the specified province if found, otherwise null.</returns>
 
-        Task<ILocalityMetadata> GetLocalityAsync( string countryKey, string provinceKey, string localityKey, string language = null );
+        Task<ProvinceMetadata> GetProvinceAsync( string country, string province, string language = null, CancellationToken cancellationToken = default(CancellationToken) );
 
         /// <summary>
-        /// Returns metadata for the specified sublocality if it is available.
+        /// Returns metadata for the specified locality.
         /// </summary>
-        /// <param name="countryKey">Key of the parent country.</param>
-        /// <param name="provinceKey">Key of the parent province.</param>
-        /// <param name="localityKey">Key of the parent locality.</param>
-        /// <param name="sublocalityKey">Key of the sublocality to return.</param>
-        /// <param name="language">
-        /// (Optional) Language code for the metadata to return.
-        /// If metadata is not available for the language, no result will be returned.
-        /// </param>
+        /// <param name="country">Key of the containing country.</param>
+        /// <param name="province">Key or name of the containing province.</param>
+        /// <param name="locality">Key or name of the locality.</param>
+        /// <param name="language">Requested language of the metadata.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        /// <returns>Metadata for the specified locality if found, otherwise null.</returns>
 
-        Task<ISublocalityMetadata> GetSublocalityAsync( string countryKey, string provinceKey, string localityKey, string sublocalityKey, string language = null );
+        Task<LocalityMetadata> GetLocalityAsync( string country, string province, string locality, string language = null, CancellationToken cancellationToken = default(CancellationToken) );
+
+        /// <summary>
+        /// Returns metadata for the specified sublocality.
+        /// </summary>
+        /// <param name="country">Key of the containing country.</param>
+        /// <param name="province">Key or name of the containing province.</param>
+        /// <param name="locality">Key or name of the containing locality.</param>
+        /// <param name="sublocality">Key or name of the sublocality.</param>
+        /// <param name="language">Requested language of the metadata.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        /// <returns>Metadata for the specified sublocality if found, otherwise null.</returns>
+
+        Task<SublocalityMetadata> GetSublocalityAsync( string country, string province, string locality, string sublocality, string language = null, CancellationToken cancellationToken = default(CancellationToken) );
     }
 }

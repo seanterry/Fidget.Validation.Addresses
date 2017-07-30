@@ -1,7 +1,8 @@
-﻿using Fidget.Validation.Addresses.Service;
-using Fidget.Validation.Addresses.Service.Metadata;
-using Fidget.Validation.Addresses.Service.Metadata.Internal;
+﻿using Fidget.Commander;
+using Fidget.Validation.Addresses.Metadata;
+using Fidget.Validation.Addresses.Metadata.Commands;
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Fidget.Validation.Addresses
@@ -13,130 +14,127 @@ namespace Fidget.Validation.Addresses
     public class AddressService : IAddressService
     {
         /// <summary>
-        /// Default service client factory.
+        /// Factory method for creating a new instance of the service.
         /// </summary>
         
-        static readonly ServiceClient.Factory ServiceClientFactory = new ServiceClient.Factory();
+        public static IAddressService FactoryMethod() => DependencyInjection.Container.GetInstance<IAddressService>();
 
         /// <summary>
-        /// Remote address service client.
+        /// Gets the default instance of the service.
+        /// </summary>
+
+        public static IAddressService Default { get; } = FactoryMethod();
+        
+        /// <summary>
+        /// Command dispatcher.
         /// </summary>
         
-        readonly IServiceClient Client;
+        readonly ICommandDispatcher Dispatcher;
 
         /// <summary>
         /// Constructs a service for address validation and metadata exploration.
         /// </summary>
-        /// <param name="client">Remote address service client.</param>
+        /// <param name="dispatcher">Command dispatcher.</param>
         
-        internal AddressService( IServiceClient client )
+        public AddressService( ICommandDispatcher dispatcher )
         {
-            Client = client ?? throw new ArgumentNullException( nameof(client) );
+            Dispatcher = dispatcher ?? throw new ArgumentNullException( nameof(dispatcher) );
         }
-
-        /// <summary>
-        /// Constructs a service for address validation and metadata exploration.
-        /// </summary>
-        
-        public AddressService() : this( ServiceClient.Default ) {}
 
         /// <summary>
         /// Returns gobal metadata information.
         /// </summary>
+        /// <param name="cancellationToken">Cancellation token.</param>
         
-        public async Task<IGlobalMetadata> GetGlobalAsync() => await Client.Query<GlobalMetadata>( "data" );
+        public async Task<GlobalMetadata> GetGlobalAsync( CancellationToken cancellationToken ) => 
+            await Dispatcher.Execute( GlobalMetadataQuery.Default, cancellationToken );
 
         /// <summary>
-        /// Builds and returns the data service identifier based on the given keys and language.
+        /// Returns metadata for the specified country.
         /// </summary>
-        /// <param name="language">Language to encode into the identifier.</param>
-        /// <param name="keys">Keys for the identifier.</param>
-                
-        string BuildIdentifier( string language, params string[] keys ) => $"data/{string.Join( "/", keys )}{(language != null ? $"--{language}" : string.Empty)}";
-
-        /// <summary>
-        /// Returns metadata for the specified country if it is available.
-        /// </summary>
-        /// <param name="countryKey">Key of the country to return.</param>
-        /// <param name="language">Language code for the metadata to return.</param>
-
-        public async Task<ICountryMetadata> GetCountryAsync( string countryKey, string language )
+        /// <param name="country">Key of the country.</param>
+        /// <param name="language">Requested language of the metadata.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        /// <returns>Metadata for the specified country if found, otherwise null.</returns>
+        
+        public async Task<CountryMetadata> GetCountryAsync( string country, string language, CancellationToken cancellationToken )
         {
-            if ( countryKey == null ) throw new ArgumentNullException( nameof( countryKey ) );
-
-            var id = BuildIdentifier( language, countryKey );
-            var defaults = await Client.Query<CountryMetadata>( "data/ZZ" );
-            var result = await Client.Query<CountryMetadata>( id );
-
-            if ( result != null && defaults != null )
+            var query = new CountryMetadataQuery
             {
-                result.Format = result.Format ?? defaults.Format;
-                result.Required = result.Required ?? defaults.Required;
-                result.Uppercase = result.Uppercase ?? defaults.Uppercase;
-                result.StateType = result.StateType ?? defaults.StateType;
-                result.LocalityType = result.LocalityType ?? defaults.LocalityType;
-                result.SublocalityType = result.SublocalityType ?? defaults.SublocalityType;
-                result.PostalCodeType = result.PostalCodeType ?? defaults.PostalCodeType;
-            }
-            
-            return result;
+                Country = country,
+                Language = language,
+            };
+
+            return await Dispatcher.Execute( query, cancellationToken );
         }
 
         /// <summary>
-        /// Returns metadata for the specified province if it is available.
+        /// Returns metadata for the specified province.
         /// </summary>
-        /// <param name="countryKey">Key of the parent country.</param>
-        /// <param name="provinceKey">Key of the province to return.</param>
-        /// <param name="language">Language code for the metadata to return.</param>
+        /// <param name="country">Key of the containing country.</param>
+        /// <param name="province">Key or name of the province.</param>
+        /// <param name="language">Requested language of the metadata.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        /// <returns>Metadata for the specified province if found, otherwise null.</returns>
         
-        public async Task<IProvinceMetadata> GetProvinceAsync( string countryKey, string provinceKey, string language )
+        public async Task<ProvinceMetadata> GetProvinceAsync( string country, string province, string language, CancellationToken cancellationToken )
         {
-            if ( countryKey == null ) throw new ArgumentNullException( nameof( countryKey ) );
-            if ( provinceKey == null ) throw new ArgumentNullException( nameof( provinceKey ) );
+            var query = new ProvinceMetadataQuery
+            {
+                Country = country,
+                Province = province,
+                Language = language,
+            };
 
-            var id = BuildIdentifier( language, countryKey, provinceKey );
-            
-            return await Client.Query<ProvinceMetadata>( id );
+            return await Dispatcher.Execute( query, cancellationToken );
         }
 
         /// <summary>
-        /// Returns metadata for the specified locality if it is available.
+        /// Returns metadata for the specified locality.
         /// </summary>
-        /// <param name="countryKey">Key of the parent country.</param>
-        /// <param name="provinceKey">Key of the parent province.</param>
-        /// <param name="localityKey">Key of the locality to return.</param>
-        /// <param name="language">Language code for the metadata to return.</param>
-        
-        public async Task<ILocalityMetadata> GetLocalityAsync( string countryKey, string provinceKey, string localityKey, string language )
+        /// <param name="country">Key of the containing country.</param>
+        /// <param name="province">Key or name of the containing province.</param>
+        /// <param name="locality">Key or name of the locality.</param>
+        /// <param name="language">Requested language of the metadata.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        /// <returns>Metadata for the specified locality if found, otherwise null.</returns>
+
+        public async Task<LocalityMetadata> GetLocalityAsync( string country, string province, string locality, string language, CancellationToken cancellationToken )
         {
-            if ( countryKey == null ) throw new ArgumentNullException( nameof( countryKey ) );
-            if ( provinceKey == null ) throw new ArgumentNullException( nameof( provinceKey ) );
-            if ( localityKey == null ) throw new ArgumentNullException( nameof( localityKey ) );
+            var query = new LocalityMetadataQuery
+            {
+                Country = country,
+                Province = province,
+                Locality = locality,
+                Language = language,
+            };
 
-            var id = BuildIdentifier( language, countryKey, provinceKey, localityKey );
-
-            return await Client.Query<LocalityMetadata>( id );
+            return await Dispatcher.Execute( query, cancellationToken );
         }
 
         /// <summary>
-        /// Returns metadata for the specified sublocality if it is available.
+        /// Returns metadata for the specified sublocality.
         /// </summary>
-        /// <param name="countryKey">Key of the parent country.</param>
-        /// <param name="provinceKey">Key of the parent province.</param>
-        /// <param name="localityKey">Key of the parent locality.</param>
-        /// <param name="sublocalityKey">Key of the sublocality to return.</param>
-        /// <param name="language">Language code for the metadata to return.</param>
-        
-        public async Task<ISublocalityMetadata> GetSublocalityAsync( string countryKey, string provinceKey, string localityKey, string sublocalityKey, string language )
+        /// <param name="country">Key of the containing country.</param>
+        /// <param name="province">Key or name of the containing province.</param>
+        /// <param name="locality">Key or name of the containing locality.</param>
+        /// <param name="sublocality">Key or name of the sublocality.</param>
+        /// <param name="language">Requested language of the metadata.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        /// <returns>Metadata for the specified sublocality if found, otherwise null.</returns>
+
+        public async Task<SublocalityMetadata> GetSublocalityAsync( string country, string province, string locality, string sublocality, string language, CancellationToken cancellationToken )
         {
-            if ( countryKey == null ) throw new ArgumentNullException( nameof( countryKey ) );
-            if ( provinceKey == null ) throw new ArgumentNullException( nameof( provinceKey ) );
-            if ( localityKey == null ) throw new ArgumentNullException( nameof( localityKey ) );
-            if ( sublocalityKey == null ) throw new ArgumentNullException( nameof( sublocalityKey ) );
+            var query = new SublocalityMetadataQuery
+            {
+                Country = country,
+                Province = province,
+                Locality = locality,
+                Sublocality = sublocality,
+                Language = language,
+            };
 
-            var id = BuildIdentifier( language, countryKey, provinceKey, localityKey, sublocalityKey );
-
-            return await Client.Query<SublocalityMetadata>( id );
+            return await Dispatcher.Execute( query, cancellationToken );
         }
     }
 }

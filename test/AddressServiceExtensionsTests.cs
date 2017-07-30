@@ -1,7 +1,9 @@
-﻿using Fidget.Validation.Addresses.Service.Metadata;
-using Fidget.Validation.Addresses.Service.Metadata.Internal;
+﻿using Fidget.Validation.Addresses.Metadata;
 using Moq;
 using System;
+using System.Collections.Generic;
+using System.Text;
+using System.Threading;
 using Xunit;
 
 namespace Fidget.Validation.Addresses
@@ -11,213 +13,115 @@ namespace Fidget.Validation.Addresses
         Mock<IAddressService> MockService = new Mock<IAddressService>();
         IAddressService service => MockService?.Object;
 
+        CancellationToken cancellationToken = CancellationToken.None;
+
         public class GetGlobal : AddressServiceExtensionsTests
         {
-            IGlobalMetadata invoke() => service.GetGlobal();
-
             [Fact]
             public void Requires_service()
             {
                 MockService = null;
-                Assert.Throws<ArgumentNullException>( nameof(service), ()=>invoke() );
+                Assert.Throws<ArgumentNullException>( nameof(service), ()=> service.GetGlobal() );
             }
 
-            [Fact]
-            public void Returns_serviceResult()
+            [Theory]
+            [MemberData( nameof( AddressServiceTests.GetGlobalAsync.ResultCases ), MemberType =typeof(AddressServiceTests.GetGlobalAsync) )]
+            public void Returns_serviceResult( GlobalMetadata result )
             {
-                IGlobalMetadata expected = new GlobalMetadata();
-                MockService.Setup( _=> _.GetGlobalAsync() ).ReturnsAsync( expected );
+                MockService.Setup( _=> _.GetGlobalAsync( cancellationToken ) ).ReturnsAsync( result ).Verifiable();
+                
+                var actual = service.GetGlobal();
+                Assert.Equal( result, actual );
 
-                var actual = invoke();
-                Assert.Same( expected, actual );
+                MockService.VerifyAll();
             }
         }
 
         public class GetCountry : AddressServiceExtensionsTests
         {
-            string countryKey = Guid.NewGuid().ToString();
-            string language = Guid.NewGuid().ToString();
-
-            ICountryMetadata invoke() => service.GetCountry( countryKey, language );
-
             [Fact]
             public void Requires_service()
             {
                 MockService = null;
-                Assert.Throws<ArgumentNullException>( nameof( service ), () => invoke() );
-            }
-
-            [Fact]
-            public void Requires_countryKey()
-            {
-                countryKey = null;
-                Assert.Throws<ArgumentNullException>( nameof(countryKey), ()=>invoke() );
+                Assert.Throws<ArgumentNullException>( nameof( service ), () => service.GetCountry( "XW", "en" ) );
             }
 
             [Theory]
-            [MemberData(nameof(AddressServiceTests.GetCountryAsync.GetCountryValues),MemberType =typeof(AddressServiceTests.GetCountryAsync))]
-            public void Returns_serviceResult( string countryKey, string language, string ignored, ICountryMetadata expected )
+            [MemberData( nameof( AddressServiceTests.GetCountryAsync.ResultCases ), MemberType = typeof( AddressServiceTests.GetCountryAsync ) )]
+            public void Returns_serviceResult( string country, string language, CountryMetadata result )
             {
-                MockService.Setup( _=> _.GetCountryAsync( countryKey, language ) ).ReturnsAsync( expected );
+                MockService.Setup( _ => _.GetCountryAsync( country, language, cancellationToken ) ).ReturnsAsync( result ).Verifiable();
 
-                var actual = service.GetCountry( countryKey, language );
-                Assert.Equal( expected, actual );
+                var actual = service.GetCountry( country, language );
+                Assert.Equal( result, actual );
+
+                MockService.VerifyAll();
             }
         }
 
         public class GetProvince : AddressServiceExtensionsTests
         {
-            string countryKey = Guid.NewGuid().ToString();
-            string provinceKey = Guid.NewGuid().ToString();
-            string language = Guid.NewGuid().ToString();
-
-            IProvinceMetadata invoke() => service.GetProvince( countryKey, provinceKey, language );
-
             [Fact]
             public void Requires_service()
             {
                 MockService = null;
-                Assert.Throws<ArgumentNullException>( nameof( service ), () => invoke() );
-            }
-
-            [Fact]
-            public void Requires_countryKey()
-            {
-                countryKey = null;
-                Assert.Throws<ArgumentNullException>( nameof( countryKey ), () => invoke() );
-            }
-
-            [Fact]
-            public void Requires_provinceKey()
-            {
-                provinceKey = null;
-                Assert.Throws<ArgumentNullException>( nameof( provinceKey ), () => invoke() );
+                Assert.Throws<ArgumentNullException>( nameof( service ), () => service.GetProvince( "XW", "XX", "en" ) );
             }
 
             [Theory]
-            [MemberData(nameof(AddressServiceTests.GetProvinceAsync.GetArguments),MemberType =typeof(AddressServiceTests.GetProvinceAsync))]
-            public void Returns_serviceResult( string countryKey, string provinceKey, string language, string ignored, IProvinceMetadata expected  )
+            [MemberData( nameof( AddressServiceTests.GetProvinceAsync.ResultCases ), MemberType = typeof( AddressServiceTests.GetProvinceAsync ) )]
+            public void Returns_serviceResult( string country, string province, string language, ProvinceMetadata result )
             {
-                this.countryKey = countryKey;
-                this.provinceKey = provinceKey;
-                this.language = language;
-                MockService.Setup( _=> _.GetProvinceAsync( countryKey, provinceKey, language ) ).ReturnsAsync( expected );
+                MockService.Setup( _ => _.GetProvinceAsync( country, province, language, cancellationToken ) ).ReturnsAsync( result ).Verifiable();
 
-                var actual = invoke();
-                Assert.Equal( expected, actual );
+                var actual = service.GetProvince( country, province, language );
+                Assert.Equal( result, actual );
+
+                MockService.VerifyAll();
             }
         }
 
         public class GetLocality : AddressServiceExtensionsTests
         {
-            string countryKey = Guid.NewGuid().ToString();
-            string provinceKey = Guid.NewGuid().ToString();
-            string localityKey = Guid.NewGuid().ToString();
-            string language = Guid.NewGuid().ToString();
-
-            ILocalityMetadata invoke() => service.GetLocality( countryKey, provinceKey, localityKey, language );
-
             [Fact]
             public void Requires_service()
             {
                 MockService = null;
-                Assert.Throws<ArgumentNullException>( nameof( service ), () => invoke() );
-            }
-
-            [Fact]
-            public void Requires_countryKey()
-            {
-                countryKey = null;
-                Assert.Throws<ArgumentNullException>( nameof( countryKey ), () => invoke() );
-            }
-
-            [Fact]
-            public void Requires_provinceKey()
-            {
-                provinceKey = null;
-                Assert.Throws<ArgumentNullException>( nameof( provinceKey ), () => invoke() );
-            }
-
-            [Fact]
-            public void Requires_localityKey()
-            {
-                localityKey = null;
-                Assert.Throws<ArgumentNullException>( nameof( localityKey ), () => invoke() );
+                Assert.Throws<ArgumentNullException>( nameof( service ), () => service.GetLocality( "XW", "XX", "XY", "en" ) );
             }
 
             [Theory]
-            [MemberData(nameof(AddressServiceTests.GetLocalityAsync.GetArguments),MemberType =typeof(AddressServiceTests.GetLocalityAsync))]
-            public void Returns_serviceResult( string countryKey, string provinceKey, string localityKey, string language, string ignored, ILocalityMetadata expected  )
+            [MemberData( nameof( AddressServiceTests.GetLocalityAsync.ResultCases ), MemberType = typeof( AddressServiceTests.GetLocalityAsync ) )]
+            public void Returns_serviceResult( string country, string province, string locality, string language, LocalityMetadata result )
             {
-                this.countryKey = countryKey;
-                this.provinceKey = provinceKey;
-                this.localityKey = localityKey;
-                this.language = language;
-                MockService.Setup( _=> _.GetLocalityAsync( countryKey, provinceKey, localityKey, language ) ).ReturnsAsync( expected );
+                MockService.Setup( _ => _.GetLocalityAsync( country, province, locality, language, cancellationToken ) ).ReturnsAsync( result ).Verifiable();
 
-                var actual = invoke();
-                Assert.Equal( expected, actual );
+                var actual = service.GetLocality( country, province, locality, language );
+                Assert.Equal( result, actual );
+
+                MockService.VerifyAll();
             }
         }
 
         public class GetSublocality : AddressServiceExtensionsTests
         {
-            string countryKey = Guid.NewGuid().ToString();
-            string provinceKey = Guid.NewGuid().ToString();
-            string localityKey = Guid.NewGuid().ToString();
-            string sublocalityKey = Guid.NewGuid().ToString();
-            string language = Guid.NewGuid().ToString();
-
-            ISublocalityMetadata invoke() => service.GetSublocality( countryKey, provinceKey, localityKey, sublocalityKey, language );
-
             [Fact]
             public void Requires_service()
             {
                 MockService = null;
-                Assert.Throws<ArgumentNullException>( nameof( service ), () => invoke() );
-            }
-
-            [Fact]
-            public void Requires_countryKey()
-            {
-                countryKey = null;
-                Assert.Throws<ArgumentNullException>( nameof( countryKey ), () => invoke() );
-            }
-
-            [Fact]
-            public void Requires_provinceKey()
-            {
-                provinceKey = null;
-                Assert.Throws<ArgumentNullException>( nameof( provinceKey ), () => invoke() );
-            }
-
-            [Fact]
-            public void Requires_localityKey()
-            {
-                localityKey = null;
-                Assert.Throws<ArgumentNullException>( nameof( localityKey ), () => invoke() );
-            }
-
-            [Fact]
-            public void Requires_sublocalityKey()
-            {
-                sublocalityKey = null;
-                Assert.Throws<ArgumentNullException>( nameof( sublocalityKey ), () => invoke() );
+                Assert.Throws<ArgumentNullException>( nameof( service ), () => service.GetSublocality( "XW", "XX", "XY", "XZ", "en" ) );
             }
 
             [Theory]
-            [MemberData(nameof(AddressServiceTests.GetSublocalityAsync.GetArguments),MemberType =typeof(AddressServiceTests.GetSublocalityAsync))]
-            public void Returns_serviceResult( string countryKey, string provinceKey, string localityKey, string sublocalityKey, string language, string ignored, ISublocalityMetadata expected  )
+            [MemberData( nameof( AddressServiceTests.GetSublocalityAsync.ResultCases ), MemberType = typeof( AddressServiceTests.GetSublocalityAsync ) )]
+            public void Returns_serviceResult( string country, string province, string locality, string sublocality, string language, SublocalityMetadata result )
             {
-                this.countryKey = countryKey;
-                this.provinceKey = provinceKey;
-                this.localityKey = localityKey;
-                this.sublocalityKey = sublocalityKey;
-                this.language = language;
-                MockService.Setup( _=> _.GetSublocalityAsync( countryKey, provinceKey, localityKey, sublocalityKey, language ) ).ReturnsAsync( expected );
+                MockService.Setup( _ => _.GetSublocalityAsync( country, province, locality, sublocality, language, cancellationToken ) ).ReturnsAsync( result ).Verifiable();
 
-                var actual = invoke();
-                Assert.Equal( expected, actual );
+                var actual = service.GetSublocality( country, province, locality, sublocality, language );
+                Assert.Equal( result, actual );
+
+                MockService.VerifyAll();
             }
         }
     }
