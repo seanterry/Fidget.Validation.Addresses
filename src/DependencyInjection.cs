@@ -6,7 +6,6 @@ using Fidget.Validation.Addresses.Metadata.Commands;
 using Microsoft.Extensions.Caching.Memory;
 using StructureMap;
 using System;
-using System.Net.Http;
 
 namespace Fidget.Validation.Addresses
 {

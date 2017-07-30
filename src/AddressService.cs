@@ -1,11 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Fidget.Commander;
 using Fidget.Validation.Addresses.Metadata;
-using Fidget.Commander;
 using Fidget.Validation.Addresses.Metadata.Commands;
+using System;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Fidget.Validation.Addresses
 {
@@ -58,6 +56,75 @@ namespace Fidget.Validation.Addresses
             var query = new CountryMetadataQuery
             {
                 Country = country,
+                Language = language,
+            };
+
+            return await Dispatcher.Execute( query, cancellationToken );
+        }
+
+        /// <summary>
+        /// Returns metadata for the specified province.
+        /// </summary>
+        /// <param name="country">Key of the containing country.</param>
+        /// <param name="province">Key or name of the province.</param>
+        /// <param name="language">Requested language of the metadata.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        /// <returns>Metadata for the specified province if found, otherwise null.</returns>
+        
+        public async Task<ProvinceMetadata> GetProvinceAsync( string country, string province, string language, CancellationToken cancellationToken )
+        {
+            var query = new ProvinceMetadataQuery
+            {
+                Country = country,
+                Province = province,
+                Language = language,
+            };
+
+            return await Dispatcher.Execute( query, cancellationToken );
+        }
+
+        /// <summary>
+        /// Returns metadata for the specified locality.
+        /// </summary>
+        /// <param name="country">Key of the containing country.</param>
+        /// <param name="province">Key or name of the containing province.</param>
+        /// <param name="locality">Key or name of the locality.</param>
+        /// <param name="language">Requested language of the metadata.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        /// <returns>Metadata for the specified locality if found, otherwise null.</returns>
+
+        public async Task<LocalityMetadata> GetLocalityAsync( string country, string province, string locality, string language, CancellationToken cancellationToken )
+        {
+            var query = new LocalityMetadataQuery
+            {
+                Country = country,
+                Province = province,
+                Locality = locality,
+                Language = language,
+            };
+
+            return await Dispatcher.Execute( query, cancellationToken );
+        }
+
+        /// <summary>
+        /// Returns metadata for the specified sublocality.
+        /// </summary>
+        /// <param name="country">Key of the containing country.</param>
+        /// <param name="province">Key or name of the containing province.</param>
+        /// <param name="locality">Key or name of the containing locality.</param>
+        /// <param name="sublocality">Key or name of the sublocality.</param>
+        /// <param name="language">Requested language of the metadata.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        /// <returns>Metadata for the specified sublocality if found, otherwise null.</returns>
+
+        public async Task<SublocalityMetadata> GetSublocalityAsync( string country, string province, string locality, string sublocality, string language, CancellationToken cancellationToken )
+        {
+            var query = new SublocalityMetadataQuery
+            {
+                Country = country,
+                Province = province,
+                Locality = locality,
+                Sublocality = sublocality,
                 Language = language,
             };
 
