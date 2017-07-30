@@ -62,6 +62,7 @@ namespace Fidget.Validation.Addresses.Client
         /// </summary>
         /// <param name="parent">Parent region metadata.</param>
         /// <param name="key">Key of the child region.</param>
+        /// <param name="language">Language to encode in the identifier.</param>
         
         public string BuildIdentifier( CommonMetadata parent, string key, string language )
         {

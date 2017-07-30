@@ -3,7 +3,7 @@
     /// <summary>
     /// Enumeration of address fields
     /// </summary>
-    /// <see cref="https://github.com/googlei18n/libaddressinput/wiki/AddressValidationMetadata"/>
+    /// <see cref="!:https://github.com/googlei18n/libaddressinput/wiki/AddressValidationMetadata"/>
 
     public enum AddressField
     {

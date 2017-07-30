@@ -14,11 +14,17 @@ namespace Fidget.Validation.Addresses
     public class AddressService : IAddressService
     {
         /// <summary>
-        /// Gets the default instance of the service.
+        /// Factory method for creating a new instance of the service.
         /// </summary>
         
-        public static IAddressService Default { get; } = DependencyInjection.Container.GetInstance<IAddressService>();
+        public static IAddressService FactoryMethod() => DependencyInjection.Container.GetInstance<IAddressService>();
 
+        /// <summary>
+        /// Gets the default instance of the service.
+        /// </summary>
+
+        public static IAddressService Default { get; } = FactoryMethod();
+        
         /// <summary>
         /// Command dispatcher.
         /// </summary>

@@ -2,7 +2,7 @@
 
     <PropertyGroup>
         <TargetFramework>netstandard1.4</TargetFramework>
-        <Version>1.0.0-alpha1</Version>
+        <Version>1.0.0-alpha2</Version>
         <PackageId>Fidget.Validation.Addresses</PackageId>
         <Authors>Sean Terry</Authors>
         <Description>Address validation and metadata exploration via the Google Address Data Service.</Description>
@@ -11,6 +11,10 @@
         <Copyright>Copyright 2017 Sean Terry</Copyright>
         <PackageLicenseUrl>https://github.com/seanterry42/Fidget.Validation.Addresses/blob/master/LICENSE</PackageLicenseUrl>
         <PackageProjectUrl>https://github.com/seanterry42/Fidget.Validation.Addresses</PackageProjectUrl>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+      <DocumentationFile>bin\Debug\netstandard1.4\Fidget.Validation.Addresses.xml</DocumentationFile>
     </PropertyGroup>
 
     <ItemGroup>
