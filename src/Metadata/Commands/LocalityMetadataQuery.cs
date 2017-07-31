@@ -38,6 +38,24 @@ namespace Fidget.Validation.Addresses.Metadata.Commands
         public string Language { get; set; }
 
         /// <summary>
+        /// Creates and returns a query to return the locality for the given address entry.
+        /// </summary>
+        /// <param name="address">Address for which to create a query.</param>
+
+        public static LocalityMetadataQuery For( AddressData address )
+        {
+            if ( address == null ) throw new ArgumentNullException( nameof( address ) );
+
+            return new LocalityMetadataQuery
+            {
+                Country = address.Country,
+                Province = address.Province,
+                Locality = address.Locality,
+                Language = address.Language,
+            };
+        }
+
+        /// <summary>
         /// Handler for the command.
         /// </summary>
 

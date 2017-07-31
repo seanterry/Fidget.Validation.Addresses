@@ -17,10 +17,10 @@ Using the service in your application can be accomplished three ways:
 ### Metadata Exploration
 There are five methods for exploring metadata:
 - `GetGlobalAsync`, which contains the list of country keys.
-- `GetCountryAsync` which returns country information and lists its contained provinces.
-- `GetProvinceAsync` which returns province information and lists its contained localities.
-- `GetLocalityAsync` which returns locality information and lists its contained sublocalities.
-- `GetSublocalityAsync` which returns sublocality information.
+- `GetCountryAsync`, which returns country information and lists its contained provinces.
+- `GetProvinceAsync`, which returns province information and lists its contained localities.
+- `GetLocalityAsync`, which returns locality information and lists its contained sublocalities.
+- `GetSublocalityAsync`, which returns sublocality information.
 
 Synchronous versions of these methods are available as extension methods.
 

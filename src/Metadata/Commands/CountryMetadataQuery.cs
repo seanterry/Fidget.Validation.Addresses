@@ -26,6 +26,22 @@ namespace Fidget.Validation.Addresses.Metadata.Commands
         public string Language { get; set; }
 
         /// <summary>
+        /// Creates and returns a query to return the country for the given address entry.
+        /// </summary>
+        /// <param name="address">Address for which to create a query.</param>
+        
+        public static CountryMetadataQuery For( AddressData address )
+        {
+            if ( address == null ) throw new ArgumentNullException( nameof( address ) );
+
+            return new CountryMetadataQuery
+            {
+                Country = address.Country,
+                Language = address.Language,
+            };
+        }
+
+        /// <summary>
         /// Handler for the command.
         /// </summary>
 

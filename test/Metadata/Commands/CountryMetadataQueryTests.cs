@@ -1,7 +1,9 @@
 ﻿using Fidget.Commander;
+using Fidget.Extensions.Reflection;
 using Moq;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
@@ -14,6 +16,60 @@ namespace Fidget.Validation.Addresses.Metadata.Commands
         
         IMetadataQueryContext context => FakeContext;
         ICommandHandler<CountryMetadataQuery,CountryMetadata> instance => new CountryMetadataQuery.Handler( context );
+
+        public class For
+        {
+            AddressData address;
+            CountryMetadataQuery invoke() => CountryMetadataQuery.For( address );
+            
+            static string random() => Convert.ToBase64String( Guid.NewGuid().ToByteArray() );
+
+            [Fact]
+            public void Requires_address()
+            {
+                address = null;
+                Assert.Throws<ArgumentNullException>( nameof(address), ()=>invoke() );
+            }
+
+            public static IEnumerable<object[]> QueryCases()
+            {
+                var countries = new string[] { null, random() };
+                var provinces = new string[] { null, random() };
+                var localities = new string[] { null, random() };
+                var sublocalities = new string[] { null, random() };
+                var languages = new string[] { null, random() };
+
+                return
+                    from country in countries
+                    from province in provinces
+                    from locality in localities
+                    from sublocality in sublocalities
+                    from language in languages
+                    select new object[] { new AddressData 
+                    { 
+                        Country = country, 
+                        Province = province,
+                        Locality = locality,
+                        Sublocality = sublocality,
+                        Language = language 
+                    }};
+            }
+
+            [Theory]
+            [MemberData(nameof(QueryCases))]
+            public void Returns_query( AddressData address )
+            {
+                var expected = new CountryMetadataQuery
+                {
+                    Country = address.Country,
+                    Language = address.Language,
+                };
+                
+                this.address = address;
+                var actual = invoke();
+                Assert.Equal( expected, actual );
+            }
+        }
 
         public class Constructor : CountryMetadataQueryTests
         {

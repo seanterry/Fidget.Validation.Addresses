@@ -15,6 +15,37 @@ namespace Fidget.Validation.Addresses.Metadata.Commands
         IMetadataQueryContext context => FakeContext;
         ICommandHandler<ProvinceMetadataQuery, ProvinceMetadata> instance => new ProvinceMetadataQuery.Handler( context );
 
+        public class For
+        {
+            AddressData address;
+            ProvinceMetadataQuery invoke() => ProvinceMetadataQuery.For( address );
+
+            static string random() => Convert.ToBase64String( Guid.NewGuid().ToByteArray() );
+
+            [Fact]
+            public void Requires_address()
+            {
+                address = null;
+                Assert.Throws<ArgumentNullException>( nameof( address ), () => invoke() );
+            }
+
+            [Theory]
+            [MemberData( nameof( CountryMetadataQueryTests.For.QueryCases ), MemberType =typeof(CountryMetadataQueryTests.For) )]
+            public void Returns_query( AddressData address )
+            {
+                var expected = new ProvinceMetadataQuery
+                {
+                    Country = address.Country,
+                    Province = address.Province,
+                    Language = address.Language,
+                };
+
+                this.address = address;
+                var actual = invoke();
+                Assert.Equal( expected, actual );
+            }
+        }
+
         public class Constructor : ProvinceMetadataQueryTests
         {
             [Fact]
