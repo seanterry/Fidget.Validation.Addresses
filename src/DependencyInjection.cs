@@ -3,6 +3,7 @@ using Fidget.Commander.Dispatch;
 using Fidget.Validation.Addresses.Client;
 using Fidget.Validation.Addresses.Client.Decorators;
 using Fidget.Validation.Addresses.Metadata.Commands;
+using Fidget.Validation.Addresses.Validation;
 using Microsoft.Extensions.Caching.Memory;
 using StructureMap;
 using System;
@@ -45,6 +46,7 @@ namespace Fidget.Validation.Addresses
                 config.For<IServiceClient>().DecorateAllWith<CopyingDecorator>();
                 config.For<IKeyBuilder>().Use<KeyBuilder>();
                 config.For<IMetadataQueryContext>().Use<MetadataQueryContext>();
+                config.For<IValidationContextFactory>().Use<ValidationContextFactory>();
                 config.For<IAddressService>().Use<AddressService>();
             }
 

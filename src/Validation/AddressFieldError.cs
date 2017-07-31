@@ -1,4 +1,4 @@
-﻿namespace Fidget.Validation.Addresses
+﻿namespace Fidget.Validation.Addresses.Validation
 {
     /// <summary>
     /// Enumeration of errors that can be encountered in an address field.
