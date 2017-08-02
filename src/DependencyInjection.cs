@@ -30,6 +30,7 @@ namespace Fidget.Validation.Addresses
                     scanner.AssemblyContainingType<AddressData>();
                     scanner.ConnectImplementationsToTypesClosing( typeof( ICommandHandler<,> ) );
                     scanner.ConnectImplementationsToTypesClosing( typeof( ICommandDecorator<,> ) );
+                    scanner.AddAllTypesOf<IAddressValidator>();
                 });
 
                 // register command pipeline
