@@ -1,7 +1,4 @@
-﻿using Fidget.Validation.Addresses.Metadata;
-using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
 using System.Text.RegularExpressions;
 
 namespace Fidget.Validation.Addresses.Validation.Validators
@@ -9,7 +6,7 @@ namespace Fidget.Validation.Addresses.Validation.Validators
     /// <summary>
     /// Validates the postal code field in an address.
     /// </summary>
-    
+
     public class PostalCodeValidator : IAddressValidator
     {
         /// <summary>
@@ -43,7 +40,7 @@ namespace Fidget.Validation.Addresses.Validation.Validators
             {
                 context.SublocalityMetadata?.PostalCodePattern,
                 context.LocalityMetadata?.PostalCodePattern,
-                context.ProvinceMetadata.PostalCodePattern,
+                context.ProvinceMetadata?.PostalCodePattern,
             };
 
             if ( !string.IsNullOrWhiteSpace( value ) )

@@ -1,6 +1,7 @@
 ﻿using Fidget.Commander;
 using Fidget.Validation.Addresses.Metadata;
 using Fidget.Validation.Addresses.Metadata.Commands;
+using Fidget.Validation.Addresses.Validation;
 using Moq;
 using System;
 using System.Collections.Generic;
@@ -203,6 +204,49 @@ namespace Fidget.Validation.Addresses
                 MockDispatcher.Setup( _ => _.Execute( query, cancellationToken ) ).ReturnsAsync( result ).Verifiable();
 
                 var actual = await instance.GetSublocalityAsync( country, province, locality, sublocality, language, cancellationToken );
+                Assert.Equal( result, actual );
+                MockDispatcher.VerifyAll();
+            }
+        }
+
+        public class ValidateAsync : AddressServiceTests
+        {
+            AddressData address;
+            Task<IEnumerable<AddressValidationFailure>> invoke() => instance.ValidateAsync( address, cancellationToken );
+
+            [Fact]
+            public async Task Requires_address()
+            {
+                address = null;
+                await Assert.ThrowsAsync<ArgumentNullException>( nameof(address), invoke );
+            }
+
+            public static IEnumerable<object[]> ValidateResults()
+            {
+                var errors = Enum.GetValues( typeof(AddressFieldError) ).OfType<AddressFieldError>();
+                var fields = Enum.GetValues( typeof(AddressField) ).OfType<AddressField>();
+                var all =
+                    from error in errors
+                    from field in fields
+                    select new AddressValidationFailure { Field = field, Error = error };
+
+                yield return new object[] { all.ToArray() };
+                yield return new object[] { new AddressValidationFailure[0] };
+            }
+
+            [Theory]
+            [MemberData(nameof(ValidateResults))]
+            public async Task Returns_commandResult( AddressValidationFailure[] result )
+            {
+                address = new AddressData { Country = "US", StreetAddress = "123 Anywhere St." };
+                var command = new Validation.Commands.ValidateAddressCommand
+                {
+                    Address = address,
+                };
+
+                MockDispatcher.Setup( _=> _.Execute( command, cancellationToken ) ).ReturnsAsync( result ).Verifiable();
+
+                var actual = await invoke();
                 Assert.Equal( result, actual );
                 MockDispatcher.VerifyAll();
             }

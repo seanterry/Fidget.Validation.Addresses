@@ -43,5 +43,21 @@ namespace Fidget.Validation.Addresses
             var actual = await DependencyInjection.Container.GetInstance<ICommandDispatcher>().Execute( query );
             Assert.NotNull( actual );
         }
+
+        [Fact]
+        public async Task Validate()
+        {
+            var address = new AddressData
+            {
+                StreetAddress = "123 Anywhere St.",
+                Locality = "Little Rock",
+                Province = "AR",
+                PostalCode = "72200",
+                Country = "US",
+            };
+
+            var actual = await DependencyInjection.Container.GetInstance<IAddressService>().ValidateAsync( address );
+            Assert.Empty( actual );
+        }
     }
 }

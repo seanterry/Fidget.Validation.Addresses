@@ -1,4 +1,5 @@
 ﻿using Fidget.Validation.Addresses.Metadata;
+using Fidget.Validation.Addresses.Validation;
 using Moq;
 using System;
 using System.Collections.Generic;
@@ -119,6 +120,30 @@ namespace Fidget.Validation.Addresses
                 MockService.Setup( _ => _.GetSublocalityAsync( country, province, locality, sublocality, language, cancellationToken ) ).ReturnsAsync( result ).Verifiable();
 
                 var actual = service.GetSublocality( country, province, locality, sublocality, language );
+                Assert.Equal( result, actual );
+
+                MockService.VerifyAll();
+            }
+        }
+
+        public class Validate : AddressServiceExtensionsTests
+        {
+            AddressData address = new AddressData { Country = "US", StreetAddress = "123 Anywhere St." };
+            
+            [Fact]
+            public void Requires_service()
+            {
+                MockService = null;
+                Assert.Throws<ArgumentNullException>( nameof(service), ()=> service.Validate( address ) );
+            }
+
+            [Theory]
+            [MemberData(nameof(AddressServiceTests.ValidateAsync.ValidateResults),MemberType =typeof(AddressServiceTests.ValidateAsync))]
+            public void Returns_serviceResult( AddressValidationFailure[] result )
+            {
+                MockService.Setup( _=> _.ValidateAsync( address, cancellationToken ) ).ReturnsAsync( result ).Verifiable();
+
+                var actual = service.Validate( address );
                 Assert.Equal( result, actual );
 
                 MockService.VerifyAll();
