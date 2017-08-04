@@ -5,9 +5,9 @@
         <Version>1.0.0</Version>
         <PackageId>Fidget.Validation.Addresses</PackageId>
         <Authors>Sean Terry</Authors>
-        <Description>Address validation and metadata exploration via the Google Address Data Service.</Description>
+        <Description>Address validation and metadata exploration via the Google Address Data Service. Note: The author is not affiliated with Google.</Description>
         <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
-        <PackageReleaseNotes></PackageReleaseNotes>
+        <PackageReleaseNotes>https://github.com/seanterry42/Fidget.Validation.Addresses/releases</PackageReleaseNotes>
         <Copyright>Copyright 2017 Sean Terry</Copyright>
         <PackageLicenseUrl>https://github.com/seanterry42/Fidget.Validation.Addresses/blob/master/LICENSE</PackageLicenseUrl>
         <PackageProjectUrl>https://github.com/seanterry42/Fidget.Validation.Addresses</PackageProjectUrl>
