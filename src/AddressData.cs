@@ -59,5 +59,12 @@
         /// </summary>
         
         public string Country { get; set; }
+
+        /// <summary>
+        /// Gets or sets the language of the address.
+        /// When not specified, it is assumed to be the default language of the country.
+        /// </summary>
+        
+        public string Language { get; set; }
     }
 }

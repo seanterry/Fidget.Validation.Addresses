@@ -1,4 +1,5 @@
 ﻿using Fidget.Validation.Addresses.Metadata;
+using Fidget.Validation.Addresses.Validation;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -88,6 +89,23 @@ namespace Fidget.Validation.Addresses
             if ( service == null ) throw new ArgumentNullException( nameof( service ) );
 
             return service.GetSublocalityAsync( country, province, locality, sublocality, language, CancellationToken.None ).Result;
+        }
+
+        /// <summary>
+        /// Validates the given address and returns the collection of any validation failures.
+        /// </summary>
+        /// <param name="service">Remote address service.</param>
+        /// <param name="address">Address to validate.</param>
+        /// <returns>
+        /// A collection containing any validation failures. 
+        /// When the address is valid, the collection will be empty.
+        /// </returns>
+        
+        public static IEnumerable<AddressValidationFailure> Validate( this IAddressService service, AddressData address )
+        {
+            if ( service == null ) throw new ArgumentNullException( nameof( service ) );
+
+            return service.ValidateAsync( address, CancellationToken.None ).Result;
         }
     }
 }

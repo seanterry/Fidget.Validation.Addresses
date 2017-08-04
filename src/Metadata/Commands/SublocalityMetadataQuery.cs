@@ -44,6 +44,25 @@ namespace Fidget.Validation.Addresses.Metadata.Commands
         public string Language { get; set; }
 
         /// <summary>
+        /// Creates and returns a query to return the sublocality for the given address entry.
+        /// </summary>
+        /// <param name="address">Address for which to create a query.</param>
+
+        public static SublocalityMetadataQuery For( AddressData address )
+        {
+            if ( address == null ) throw new ArgumentNullException( nameof( address ) );
+
+            return new SublocalityMetadataQuery
+            {
+                Country = address.Country,
+                Province = address.Province,
+                Locality = address.Locality,
+                Sublocality = address.Sublocality,
+                Language = address.Language,
+            };
+        }
+
+        /// <summary>
         /// Handler for the command.
         /// </summary>
 

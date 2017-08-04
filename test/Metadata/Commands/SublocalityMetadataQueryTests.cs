@@ -16,6 +16,39 @@ namespace Fidget.Validation.Addresses.Metadata.Commands
         IMetadataQueryContext context => FakeContext;
         ICommandHandler<SublocalityMetadataQuery, SublocalityMetadata> instance => new SublocalityMetadataQuery.Handler( context );
 
+        public class For
+        {
+            AddressData address;
+            SublocalityMetadataQuery invoke() => SublocalityMetadataQuery.For( address );
+
+            static string random() => Convert.ToBase64String( Guid.NewGuid().ToByteArray() );
+
+            [Fact]
+            public void Requires_address()
+            {
+                address = null;
+                Assert.Throws<ArgumentNullException>( nameof( address ), () => invoke() );
+            }
+
+            [Theory]
+            [MemberData( nameof( CountryMetadataQueryTests.For.QueryCases ), MemberType = typeof( CountryMetadataQueryTests.For ) )]
+            public void Returns_query( AddressData address )
+            {
+                var expected = new SublocalityMetadataQuery
+                {
+                    Country = address.Country,
+                    Province = address.Province,
+                    Locality = address.Locality,
+                    Sublocality = address.Sublocality,
+                    Language = address.Language,
+                };
+
+                this.address = address;
+                var actual = invoke();
+                Assert.Equal( expected, actual );
+            }
+        }
+
         public class Constructor : SublocalityMetadataQueryTests
         {
             [Fact]

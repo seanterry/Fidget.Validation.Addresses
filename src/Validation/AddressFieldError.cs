@@ -1,4 +1,4 @@
-﻿namespace Fidget.Validation.Addresses
+﻿namespace Fidget.Validation.Addresses.Validation
 {
     /// <summary>
     /// Enumeration of errors that can be encountered in an address field.
@@ -7,7 +7,7 @@
     public enum AddressFieldError
     {
         /// <summary>
-        /// The field but contains a value when the field is not valid for use in the country.
+        /// The field contains a value when the field is not valid for use in the country.
         /// </summary>
         /// <remarks>
         /// <see cref="!:https://github.com/googlei18n/libaddressinput/blob/master/common/src/main/java/com/google/i18n/addressinput/common/AddressProblemType.java"/>

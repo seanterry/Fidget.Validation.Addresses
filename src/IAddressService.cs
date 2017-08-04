@@ -1,4 +1,6 @@
 ﻿using Fidget.Validation.Addresses.Metadata;
+using Fidget.Validation.Addresses.Validation;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -62,5 +64,17 @@ namespace Fidget.Validation.Addresses
         /// <returns>Metadata for the specified sublocality if found, otherwise null.</returns>
 
         Task<SublocalityMetadata> GetSublocalityAsync( string country, string province, string locality, string sublocality, string language = null, CancellationToken cancellationToken = default(CancellationToken) );
+
+        /// <summary>
+        /// Validates the given address and returns the collection of any validation failures.
+        /// </summary>
+        /// <param name="address">Address to validate.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        /// <returns>
+        /// A collection containing any validation failures. 
+        /// When the address is valid, the collection will be empty.
+        /// </returns>
+
+        Task<IEnumerable<AddressValidationFailure>> ValidateAsync( AddressData address, CancellationToken cancellationToken = default(CancellationToken) );
     }
 }
